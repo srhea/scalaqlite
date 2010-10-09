@@ -4,7 +4,10 @@ all: Sqlite3C.class libSqlite3Java.dylib
 clean:
 	rm Sqlite3C.class Sqlite3C.h libSqlite3Java.dylib
 
-.PHONY: all, clean
+run: Sqlite3C.class libSqlite3Java.dylib
+	scala-2.8 sqlite3.scala
+
+.PHONY: all, clean, run
 
 libSqlite3Java.dylib: Sqlite3C.cc Sqlite3C.h
 	g++ -dynamiclib -o $@ \
