@@ -1,4 +1,4 @@
-class Sqlite3 {
+class Sqlite3C {
     public static final int SQLITE_OK = 0;
     public static final int SQLITE_ROW = 100;
     public static final int SQLITE_DONE = 101;

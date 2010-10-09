@@ -1,22 +1,22 @@
 
-all: Sqlite3.class libSqlite3Java.dylib
+all: Sqlite3C.class libSqlite3Java.dylib
 
 clean:
-	rm Sqlite3.class Sqlite3.h libSqlite3Java.dylib
+	rm Sqlite3C.class Sqlite3C.h libSqlite3Java.dylib
 
 .PHONY: all, clean
 
-libSqlite3Java.dylib: Sqlite3.cc Sqlite3.h
+libSqlite3Java.dylib: Sqlite3C.cc Sqlite3C.h
 	g++ -dynamiclib -o $@ \
 		-I /System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers \
 		-L/opt/local/lib \
 		$< -lsqlite3
 
-Sqlite3.class: Sqlite3.java
+Sqlite3C.class: Sqlite3C.java
 	javac $<
 
-Sqlite3.h: Sqlite3.java
-	javah -jni Sqlite3
+Sqlite3C.h: Sqlite3C.java
+	javah -jni Sqlite3C
 
 cex: main.o
 	g++ -o $@ $^ -lsqlite3

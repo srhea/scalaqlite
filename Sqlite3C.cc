@@ -1,10 +1,10 @@
-#include "Sqlite3.h"
+#include "Sqlite3C.h"
 #include <stdio.h>
 #include <string.h>
 #include <sqlite3.h>
 
 JNIEXPORT jint JNICALL
-Java_Sqlite3_open(JNIEnv *env, jclass cls, jstring jpath, jlongArray jdb)
+Java_Sqlite3C_open(JNIEnv *env, jclass cls, jstring jpath, jlongArray jdb)
 {
     jboolean iscopy;
     const char *cpath = env->GetStringUTFChars(jpath, &iscopy);
@@ -19,21 +19,21 @@ Java_Sqlite3_open(JNIEnv *env, jclass cls, jstring jpath, jlongArray jdb)
 }
 
 JNIEXPORT jint JNICALL
-Java_Sqlite3_close(JNIEnv *env, jclass cls, jlong jdb)
+Java_Sqlite3C_close(JNIEnv *env, jclass cls, jlong jdb)
 {
     sqlite3 *db = (sqlite3*) jdb;
     return sqlite3_close(db);
 }
 
 JNIEXPORT jint JNICALL
-Java_Sqlite3_enable_1load_1extension(JNIEnv *env, jclass cls, jlong jdb, jint onoff)
+Java_Sqlite3C_enable_1load_1extension(JNIEnv *env, jclass cls, jlong jdb, jint onoff)
 {
     sqlite3 *db = (sqlite3*) jdb;
     return sqlite3_enable_load_extension(db, onoff);
 }
 
 JNIEXPORT jint JNICALL
-Java_Sqlite3_prepare_1v2(
+Java_Sqlite3C_prepare_1v2(
     JNIEnv *env, jclass cls, jlong jdb, jstring jsql, jlongArray jstmt)
 {
     sqlite3 *db = (sqlite3*) jdb;
@@ -51,63 +51,63 @@ Java_Sqlite3_prepare_1v2(
 }
 
 JNIEXPORT jint JNICALL
-Java_Sqlite3_step(JNIEnv *env, jclass cls, jlong jstmt)
+Java_Sqlite3C_step(JNIEnv *env, jclass cls, jlong jstmt)
 {
     sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
     return sqlite3_step(stmt);
 }
 
 JNIEXPORT jint JNICALL
-Java_Sqlite3_finalize(JNIEnv *env, jclass cls, jlong jstmt)
+Java_Sqlite3C_finalize(JNIEnv *env, jclass cls, jlong jstmt)
 {
     sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
     return sqlite3_finalize(stmt);
 }
 
 JNIEXPORT jint JNICALL
-Java_Sqlite3_column_1count(JNIEnv *env, jclass cls, jlong jstmt)
+Java_Sqlite3C_column_1count(JNIEnv *env, jclass cls, jlong jstmt)
 {
     sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
     return sqlite3_column_count(stmt);
 }
 
 JNIEXPORT jstring JNICALL
-Java_Sqlite3_column_1name(JNIEnv *env, jclass cls, jlong jstmt, jint n)
+Java_Sqlite3C_column_1name(JNIEnv *env, jclass cls, jlong jstmt, jint n)
 {
     sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
     return env->NewStringUTF(sqlite3_column_name(stmt, n));
 }
 
 JNIEXPORT jint JNICALL
-Java_Sqlite3_column_1type(JNIEnv *env, jclass cls, jlong jstmt, jint n)
+Java_Sqlite3C_column_1type(JNIEnv *env, jclass cls, jlong jstmt, jint n)
 {
     sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
     return sqlite3_column_type(stmt, n);
 }
 
 JNIEXPORT jint JNICALL
-Java_Sqlite3_column_1int(JNIEnv *env, jclass cls, jlong jstmt, jint n)
+Java_Sqlite3C_column_1int(JNIEnv *env, jclass cls, jlong jstmt, jint n)
 {
     sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
     return sqlite3_column_int(stmt, n);
 }
 
 JNIEXPORT jfloat JNICALL
-Java_Sqlite3_column_1double(JNIEnv *env, jclass cls, jlong jstmt, jint n)
+Java_Sqlite3C_column_1double(JNIEnv *env, jclass cls, jlong jstmt, jint n)
 {
     sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
     return sqlite3_column_double(stmt, n);
 }
 
 JNIEXPORT jstring JNICALL
-Java_Sqlite3_column_1text(JNIEnv *env, jclass cls, jlong jstmt, jint n)
+Java_Sqlite3C_column_1text(JNIEnv *env, jclass cls, jlong jstmt, jint n)
 {
     sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
     return env->NewStringUTF((const char*) sqlite3_column_text(stmt, n));
 }
 
 JNIEXPORT jstring JNICALL
-Java_Sqlite3_errmsg(JNIEnv *env, jclass cls, jlong jdb)
+Java_Sqlite3C_errmsg(JNIEnv *env, jclass cls, jlong jdb)
 {
     sqlite3 *db = (sqlite3*) jdb;
     return env->NewStringUTF(sqlite3_errmsg(db));
