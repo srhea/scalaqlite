@@ -1,11 +1,11 @@
 
-all: Sqlite3C.class libSqlite3Java.dylib
+all: Sqlite.class Sqlite3C.class libSqlite3Java.dylib
 
 clean:
-	rm Sqlite3C.class Sqlite3C.h libSqlite3Java.dylib
+	rm Sqlite.class Sqlite3C.class Sqlite3C.h libSqlite3Java.dylib
 
-run: Sqlite3C.class libSqlite3Java.dylib
-	scala-2.8 sqlite3.scala
+run: Sqlite.class Sqlite3C.class libSqlite3Java.dylib
+	scala-2.8 test.scala
 
 .PHONY: all, clean, run
 
@@ -14,6 +14,9 @@ libSqlite3Java.dylib: Sqlite3C.cc Sqlite3C.h
 		-I /System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers \
 		-L/opt/local/lib \
 		$< -lsqlite3
+
+Sqlite.class: Sqlite.scala Sqlite3C.class
+	scalac-2.8 $<
 
 Sqlite3C.class: Sqlite3C.java
 	javac $<
