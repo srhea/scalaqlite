@@ -6,7 +6,6 @@
 JNIEXPORT jint JNICALL
 Java_Sqlite3_sqlite3_1open(JNIEnv *env, jclass cls, jstring jpath, jlongArray jdb)
 {
-    printf("sqlite3_open\n");
     jboolean iscopy;
     const char *cpath = env->GetStringUTFChars(jpath, &iscopy);
     sqlite3 *db;
@@ -22,7 +21,6 @@ Java_Sqlite3_sqlite3_1open(JNIEnv *env, jclass cls, jstring jpath, jlongArray jd
 JNIEXPORT jint JNICALL
 Java_Sqlite3_sqlite3_1close(JNIEnv *env, jclass cls, jlong jdb)
 {
-    printf("sqlite3_close\n");
     sqlite3 *db = (sqlite3*) jdb;
     return sqlite3_close(db);
 }
@@ -30,7 +28,6 @@ Java_Sqlite3_sqlite3_1close(JNIEnv *env, jclass cls, jlong jdb)
 JNIEXPORT jint JNICALL
 Java_Sqlite3_sqlite3_1enable_1load_1extension(JNIEnv *env, jclass cls, jlong jdb, jint onoff)
 {
-    printf("sqlite3_enable_load_extension\n");
     sqlite3 *db = (sqlite3*) jdb;
     return sqlite3_enable_load_extension(db, onoff);
 }
@@ -39,7 +36,6 @@ JNIEXPORT jint JNICALL
 Java_Sqlite3_sqlite3_1prepare_1v2(
     JNIEnv *env, jclass cls, jlong jdb, jstring jsql, jlongArray jstmt)
 {
-    printf("sqlite3_prepare_v2\n");
     sqlite3 *db = (sqlite3*) jdb;
     jboolean iscopy;
     const char *csql = env->GetStringUTFChars(jsql, &iscopy);
@@ -57,7 +53,6 @@ Java_Sqlite3_sqlite3_1prepare_1v2(
 JNIEXPORT jint JNICALL
 Java_Sqlite3_sqlite3_1step(JNIEnv *env, jclass cls, jlong jstmt)
 {
-    printf("sqlite3_step\n");
     sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
     return sqlite3_step(stmt);
 }
@@ -65,7 +60,6 @@ Java_Sqlite3_sqlite3_1step(JNIEnv *env, jclass cls, jlong jstmt)
 JNIEXPORT jint JNICALL
 Java_Sqlite3_sqlite3_1finalize(JNIEnv *env, jclass cls, jlong jstmt)
 {
-    printf("sqlite3_finalize\n");
     sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
     return sqlite3_finalize(stmt);
 }
@@ -73,7 +67,6 @@ Java_Sqlite3_sqlite3_1finalize(JNIEnv *env, jclass cls, jlong jstmt)
 JNIEXPORT jint JNICALL
 Java_Sqlite3_sqlite3_1column_1count(JNIEnv *env, jclass cls, jlong jstmt)
 {
-    printf("sqlite3_column_count\n");
     sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
     return sqlite3_column_count(stmt);
 }
@@ -81,7 +74,6 @@ Java_Sqlite3_sqlite3_1column_1count(JNIEnv *env, jclass cls, jlong jstmt)
 JNIEXPORT jstring JNICALL
 Java_Sqlite3_sqlite3_1column_1name(JNIEnv *env, jclass cls, jlong jstmt, jint n)
 {
-    printf("sqlite3_column_name\n");
     sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
     return env->NewStringUTF(sqlite3_column_name(stmt, n));
 }
@@ -89,7 +81,6 @@ Java_Sqlite3_sqlite3_1column_1name(JNIEnv *env, jclass cls, jlong jstmt, jint n)
 JNIEXPORT jint JNICALL
 Java_Sqlite3_sqlite3_1column_1type(JNIEnv *env, jclass cls, jlong jstmt, jint n)
 {
-    printf("sqlite3_column_type\n");
     sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
     return sqlite3_column_type(stmt, n);
 }
@@ -97,7 +88,6 @@ Java_Sqlite3_sqlite3_1column_1type(JNIEnv *env, jclass cls, jlong jstmt, jint n)
 JNIEXPORT jint JNICALL
 Java_Sqlite3_sqlite3_1column_1int(JNIEnv *env, jclass cls, jlong jstmt, jint n)
 {
-    printf("sqlite3_column_int\n");
     sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
     return sqlite3_column_int(stmt, n);
 }
@@ -105,7 +95,6 @@ Java_Sqlite3_sqlite3_1column_1int(JNIEnv *env, jclass cls, jlong jstmt, jint n)
 JNIEXPORT jfloat JNICALL
 Java_Sqlite3_sqlite3_1column_1double(JNIEnv *env, jclass cls, jlong jstmt, jint n)
 {
-    printf("sqlite3_column_double\n");
     sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
     return sqlite3_column_double(stmt, n);
 }
@@ -113,7 +102,6 @@ Java_Sqlite3_sqlite3_1column_1double(JNIEnv *env, jclass cls, jlong jstmt, jint 
 JNIEXPORT jstring JNICALL
 Java_Sqlite3_sqlite3_1column_1text(JNIEnv *env, jclass cls, jlong jstmt, jint n)
 {
-    printf("sqlite3_column_text\n");
     sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
     return env->NewStringUTF((const char*) sqlite3_column_text(stmt, n));
 }
@@ -121,7 +109,6 @@ Java_Sqlite3_sqlite3_1column_1text(JNIEnv *env, jclass cls, jlong jstmt, jint n)
 JNIEXPORT jstring JNICALL
 Java_Sqlite3_sqlite3_1errmsg(JNIEnv *env, jclass cls, jlong jdb)
 {
-    printf("sqlite3_errmsg\n");
     sqlite3 *db = (sqlite3*) jdb;
     return env->NewStringUTF(sqlite3_errmsg(db));
 }

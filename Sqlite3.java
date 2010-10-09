@@ -65,13 +65,13 @@ class Sqlite3 {
                 if (i != 0) System.out.print(" ");
                 switch (sqlite3_column_type(stmt[0], i)) {
                    case SQLITE_INTEGER:
-                       System.out.println(Integer.toString(sqlite3_column_int(stmt[0], i)));
+                       System.out.print(Integer.toString(sqlite3_column_int(stmt[0], i)));
                        break;
                    case SQLITE_FLOAT:
-                       System.out.println(Double.toString(sqlite3_column_double(stmt[0], i)));
+                       System.out.print(Double.toString(sqlite3_column_double(stmt[0], i)));
                        break;
                    case SQLITE_TEXT:
-                       System.out.println(sqlite3_column_text(stmt[0], i));
+                       System.out.print(sqlite3_column_text(stmt[0], i));
                        break;
                    default:
                        throw new Exception("unknown column type");
