@@ -53,3 +53,12 @@ Java_Sqlite3_sqlite3_1step(JNIEnv *env, jclass cls, jlong jstmt)
     sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
     return sqlite3_step(stmt);
 }
+
+
+JNIEXPORT jstring JNICALL
+Java_Sqlite3_sqlite3_1errmsg(JNIEnv *env, jclass cls, jlong jdb)
+{
+    printf("sqlite3_errmsg\n");
+    sqlite3 *db = (sqlite3*) jdb;
+    return env->NewStringUTF(sqlite3_errmsg(db));
+}
