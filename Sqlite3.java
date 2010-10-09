@@ -6,6 +6,7 @@ class Sqlite3 {
     native static public int sqlite3_enable_load_extension(long db, int onoff);
     native static public int sqlite3_prepare_v2(long db, String sql, long[] stmt);
     native static public int sqlite3_step(long stmt);
+    native static public int sqlite3_finalize(long stmt);
     native static public String sqlite3_errmsg(long db);
 
     public static void main(String[] args) throws Exception {
@@ -23,6 +24,9 @@ class Sqlite3 {
         r = sqlite3_step(stmt[0]);
         if (r != SQLITE_DONE)
             throw new Exception("step failed(" + r + "): " + sqlite3_errmsg(db[0]));
+        r = sqlite3_finalize(stmt[0]);
+        if (r != SQLITE_OK)
+            throw new Exception("finalize failed(" + r + "): " + sqlite3_errmsg(db[0]));
     }
 
     static {

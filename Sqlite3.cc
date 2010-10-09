@@ -54,6 +54,13 @@ Java_Sqlite3_sqlite3_1step(JNIEnv *env, jclass cls, jlong jstmt)
     return sqlite3_step(stmt);
 }
 
+JNIEXPORT jint JNICALL
+Java_Sqlite3_sqlite3_1finalize(JNIEnv *env, jclass cls, jlong jstmt)
+{
+    printf("sqlite3_finalize\n");
+    sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
+    return sqlite3_finalize(stmt);
+}
 
 JNIEXPORT jstring JNICALL
 Java_Sqlite3_sqlite3_1errmsg(JNIEnv *env, jclass cls, jlong jdb)
