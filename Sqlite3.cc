@@ -20,6 +20,14 @@ Java_Sqlite3_sqlite3_1open(JNIEnv *env, jclass cls, jstring jpath, jlongArray jd
 }
 
 JNIEXPORT jint JNICALL
+Java_Sqlite3_sqlite3_1close(JNIEnv *env, jclass cls, jlong jdb)
+{
+    printf("sqlite3_close\n");
+    sqlite3 *db = (sqlite3*) jdb;
+    return sqlite3_close(db);
+}
+
+JNIEXPORT jint JNICALL
 Java_Sqlite3_sqlite3_1enable_1load_1extension(JNIEnv *env, jclass cls, jlong jdb, jint onoff)
 {
     printf("sqlite3_enable_load_extension\n");

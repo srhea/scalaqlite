@@ -3,6 +3,7 @@ class Sqlite3 {
     public static final int SQLITE_DONE = 101;
 
     native static public int sqlite3_open(String path, long[] db);
+    native static public int sqlite3_close(long db);
     native static public int sqlite3_enable_load_extension(long db, int onoff);
     native static public int sqlite3_prepare_v2(long db, String sql, long[] stmt);
     native static public int sqlite3_step(long stmt);
@@ -27,6 +28,9 @@ class Sqlite3 {
         r = sqlite3_finalize(stmt[0]);
         if (r != SQLITE_OK)
             throw new Exception("finalize failed(" + r + "): " + sqlite3_errmsg(db[0]));
+        r = sqlite3_close(db[0]);
+        if (r != SQLITE_OK)
+            throw new Exception("close failed(" + r + "): " + sqlite3_errmsg(db[0]));
     }
 
     static {
