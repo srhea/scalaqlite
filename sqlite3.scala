@@ -14,9 +14,8 @@ class Sqlite {
     class Result(dbc: Sqlite, stmtc: Long) {
         private val db: Sqlite = dbc
         private var stmt: Long = stmtc
-        private var r = 0
         def done(): Boolean = {
-            stmt == 0 || r == Sqlite3C.DONE
+            stmt == 0
         }
         private def assertNotDone(): Unit = {
             if (done())
@@ -24,19 +23,18 @@ class Sqlite {
         }
         def next(): Unit = {
             assertNotDone()
-            r = Sqlite3C.step(stmt)
-            if (r != Sqlite3C.DONE && r != Sqlite3C.ROW)
+            var r = Sqlite3C.step(stmt)
+            if (r == Sqlite3C.DONE) {
+                Sqlite3C.finalize(stmt)
+                stmt = 0
+            }
+            else if (r != Sqlite3C.ROW) {
                 throw new Exception("unexpected result: " + r)
-        }
-        def close(): Unit = {
-            if (stmt == 0)
-                throw new Exception("already closed")
-            Sqlite3C.finalize(stmt)
-            stmt = 0
+            }
         }
         override def finalize(): Unit = {
             if (stmt != 0)
-                close()
+                Sqlite3C.finalize(stmt)
         }
         def columnCount(): Int = {
             assertNotDone()
@@ -71,7 +69,6 @@ class Sqlite {
         while (!stmt.done()) {
             stmt.next()
         }
-        stmt.close()
     }
 }
 
@@ -99,6 +96,5 @@ while (!res.done()) {
     System.out.println()
     res.next()
 }
-res.close()
 db.close()
 
