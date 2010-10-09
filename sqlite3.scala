@@ -4,11 +4,16 @@ class Sqlite {
         if (rc != Sqlite3C.OK)
             throw new Exception(method + " failed: " + errmsg())
     }
+    private def assertOpen(): Unit = {
+        if (db(0) == 0)
+            throw new Exception("db is not open")
+    }
     def open(path: String): Unit = {
         val rc = Sqlite3C.open(path, db)
         assertSuccess("open", rc);
     }
     def close(): Unit = {
+        assertOpen()
         val rc = Sqlite3C.close(db(0))
         assertSuccess("close", rc);
         db(0) = 0
@@ -64,6 +69,7 @@ class Sqlite {
         }
     }
     def query(sql: String): Result = {
+        assertOpen()
         var stmt = Array(0L)
         val rc = Sqlite3C.prepare_v2(db(0), sql, stmt)
         assertSuccess("prepare", rc);
@@ -77,6 +83,7 @@ class Sqlite {
             stmt.next()
     }
     def errmsg(): String = {
+        assertOpen()
         Sqlite3C.errmsg(db(0))
     }
 }
