@@ -11,45 +11,46 @@ class Sqlite3Db {
         if (db(0) != 0)
             close()
     }
-    class Result(dbc: Sqlite3Db) {
-        var db: Sqlite3Db = dbc
-        var stmt = Array(0L)
-        var r = Sqlite3C.SQLITE_DONE
+    class Result(dbc: Sqlite3Db, stmtc: Long) {
+        private val db: Sqlite3Db = dbc
+        private var stmt: Long = stmtc
+        private var r = Sqlite3C.SQLITE_DONE
         def done(): Boolean = {
             r == Sqlite3C.SQLITE_DONE
         }
         def next(): Unit = {
-            r = Sqlite3C.step(stmt(0))
+            r = Sqlite3C.step(stmt)
             if (r != Sqlite3C.SQLITE_DONE && r != Sqlite3C.SQLITE_ROW)
                 throw new Exception("unexpected result: " + r)
         }
         def close(): Unit = {
-            Sqlite3C.finalize(stmt(0))
-            stmt(0) = 0
+            Sqlite3C.finalize(stmt)
+            stmt = 0
         }
         override def finalize(): Unit = {
-            if (stmt(0) != 0)
+            if (stmt != 0)
                 close()
         }
         def columnCount(): Int = {
-            Sqlite3C.column_count(stmt(0))
+            Sqlite3C.column_count(stmt)
         }
         def columnType(i: Int): Int = {
-            Sqlite3C.column_type(stmt(0), i)
+            Sqlite3C.column_type(stmt, i)
         }
         def asInt(i: Int): Int = {
-            Sqlite3C.column_int(stmt(0), i)
+            Sqlite3C.column_int(stmt, i)
         }
         def asDouble(i: Int): Double = {
-            Sqlite3C.column_double(stmt(0), i)
+            Sqlite3C.column_double(stmt, i)
         }
         def asText(i: Int): String = {
-            Sqlite3C.column_text(stmt(0), i)
+            Sqlite3C.column_text(stmt, i)
         }
     }
     def query(sql: String): Result = {
-        var res = new Result(this)
-        val rc = Sqlite3C.prepare_v2(db(0), sql, res.stmt)
+        var stmt = Array(0L)
+        val rc = Sqlite3C.prepare_v2(db(0), sql, stmt)
+        var res = new Result(this, stmt(0))
         res.next()
         res
     }
