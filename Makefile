@@ -1,7 +1,10 @@
 
 all: Sqlite3.class libSqlite3Java.dylib
 
-.PHONY: all
+clean:
+	rm Sqlite3.class Sqlite3.h libSqlite3Java.dylib
+
+.PHONY: all, clean
 
 libSqlite3Java.dylib: Sqlite3.cc Sqlite3.h
 	g++ -dynamiclib -o $@ \
@@ -12,7 +15,7 @@ libSqlite3Java.dylib: Sqlite3.cc Sqlite3.h
 Sqlite3.class: Sqlite3.java
 	javac $<
 
-Sqlite3.h: Sqlite3.class
+Sqlite3.h: Sqlite3.java
 	javah -jni Sqlite3
 
 cex: main.o
