@@ -45,3 +45,11 @@ Java_Sqlite3_sqlite3_1prepare_1v2(
     env->ReleaseStringUTFChars(jsql, csql);
     return r;
 }
+
+JNIEXPORT jint JNICALL
+Java_Sqlite3_sqlite3_1step(JNIEnv *env, jclass cls, jlong jstmt)
+{
+    printf("sqlite3_step\n");
+    sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
+    return sqlite3_step(stmt);
+}
