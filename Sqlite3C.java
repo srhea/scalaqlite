@@ -1,13 +1,13 @@
 public class Sqlite3C {
-    public static final int SQLITE_OK = 0;
-    public static final int SQLITE_ROW = 100;
-    public static final int SQLITE_DONE = 101;
+    public static final int OK = 0;
+    public static final int ROW = 100;
+    public static final int DONE = 101;
 
-    public static final int SQLITE_INTEGER = 1;
-    public static final int SQLITE_FLOAT = 2;
-    public static final int SQLITE_TEXT = 3;
-    public static final int SQLITE_BLOB = 4;
-    public static final int SQLITE_NULL = 5;
+    public static final int INTEGER = 1;
+    public static final int FLOAT = 2;
+    public static final int TEXT = 3;
+    public static final int BLOB = 4;
+    public static final int NULL = 5;
 
     native static public int open(String path, long[] db);
     native static public int close(long db);

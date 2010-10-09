@@ -1,4 +1,4 @@
-class Sqlite3Db {
+class Sqlite {
     private var db = Array(0L)
     def open(path: String): Unit = {
         Sqlite3C.open(":memory:", db)
@@ -11,16 +11,16 @@ class Sqlite3Db {
         if (db(0) != 0)
             close()
     }
-    class Result(dbc: Sqlite3Db, stmtc: Long) {
-        private val db: Sqlite3Db = dbc
+    class Result(dbc: Sqlite, stmtc: Long) {
+        private val db: Sqlite = dbc
         private var stmt: Long = stmtc
-        private var r = Sqlite3C.SQLITE_DONE
+        private var r = Sqlite3C.DONE
         def done(): Boolean = {
-            r == Sqlite3C.SQLITE_DONE
+            r == Sqlite3C.DONE
         }
         def next(): Unit = {
             r = Sqlite3C.step(stmt)
-            if (r != Sqlite3C.SQLITE_DONE && r != Sqlite3C.SQLITE_ROW)
+            if (r != Sqlite3C.DONE && r != Sqlite3C.ROW)
                 throw new Exception("unexpected result: " + r)
         }
         def close(): Unit = {
@@ -63,7 +63,7 @@ class Sqlite3Db {
     }
 }
 
-var db = new Sqlite3Db
+var db = new Sqlite
 db.open(":memory:")
 db.execute("create table foo (i integer, f double, t text);")
 db.execute("insert into foo (i, f, t) values (1, 2.0, 'foo');")
@@ -75,10 +75,10 @@ while (!res.done()) {
         if (i != 0)
             System.out.print(" ")
         val s = res.columnType(i) match {
-            case Sqlite3C.SQLITE_INTEGER => res.asInt(i).toString
-            case Sqlite3C.SQLITE_FLOAT => res.asDouble(i).toString
-            case Sqlite3C.SQLITE_TEXT => res.asText(i)
-            case Sqlite3C.SQLITE_NULL => "NULL"
+            case Sqlite3C.INTEGER => res.asInt(i).toString
+            case Sqlite3C.FLOAT => res.asDouble(i).toString
+            case Sqlite3C.TEXT => res.asText(i)
+            case Sqlite3C.NULL => "NULL"
             case _ => "???"
         }
         System.out.print(s)
