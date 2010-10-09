@@ -52,6 +52,16 @@ class Sqlite3C {
         if (r != SQLITE_OK)
             throw new Exception("finalize failed(" + r + "): " + errmsg(db[0]));
 
+        r = prepare_v2(db[0], "insert into foo (i, f, t) values (3, NULL, 'bar');", stmt);
+        if (r != SQLITE_OK)
+            throw new Exception("prepare_v2 failed(" + r + "): " + errmsg(db[0]));
+        r = step(stmt[0]);
+        if (r != SQLITE_DONE)
+            throw new Exception("step failed(" + r + "): " + errmsg(db[0]));
+        r = finalize(stmt[0]);
+        if (r != SQLITE_OK)
+            throw new Exception("finalize failed(" + r + "): " + errmsg(db[0]));
+
         r = prepare_v2(db[0], "select * from foo;", stmt);
         if (r != SQLITE_OK)
             throw new Exception("prepare_v2 failed(" + r + "): " + errmsg(db[0]));
@@ -72,6 +82,9 @@ class Sqlite3C {
                        break;
                    case SQLITE_TEXT:
                        System.out.print(column_text(stmt[0], i));
+                       break;
+                   case SQLITE_NULL:
+                       System.out.print("NULL");
                        break;
                    default:
                        throw new Exception("unknown column type");
