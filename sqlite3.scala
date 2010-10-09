@@ -1,15 +1,21 @@
 class Sqlite {
     private var db = Array(0L)
+    private def assertSuccess(method: String, rc: Int): Unit = {
+        if (rc != Sqlite3C.OK)
+            throw new Exception(method + " failed: " + errmsg())
+    }
     def open(path: String): Unit = {
-        Sqlite3C.open(":memory:", db)
+        val rc = Sqlite3C.open(path, db)
+        assertSuccess("open", rc);
     }
     def close(): Unit = {
-        Sqlite3C.close(db(0))
+        val rc = Sqlite3C.close(db(0))
+        assertSuccess("close", rc);
         db(0) = 0
     }
     override def finalize(): Unit = {
         if (db(0) != 0)
-            close()
+            Sqlite3C.close(db(0)) // ignore result
     }
     class Result(dbc: Sqlite, stmtc: Long) {
         private val db: Sqlite = dbc
@@ -60,15 +66,18 @@ class Sqlite {
     def query(sql: String): Result = {
         var stmt = Array(0L)
         val rc = Sqlite3C.prepare_v2(db(0), sql, stmt)
+        assertSuccess("prepare", rc);
         var res = new Result(this, stmt(0))
         res.next()
         res
     }
     def execute(sql: String): Unit = {
         var stmt = query(sql)
-        while (!stmt.done()) {
+        while (!stmt.done())
             stmt.next()
-        }
+    }
+    def errmsg(): String = {
+        Sqlite3C.errmsg(db(0))
     }
 }
 
