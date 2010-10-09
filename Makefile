@@ -6,6 +6,7 @@ all: Sqlite3.class libSqlite3Java.dylib
 libSqlite3Java.dylib: Sqlite3.cc Sqlite3.h
 	g++ -dynamiclib -o $@ \
 		-I /System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers \
+		-L/opt/local/lib \
 		$< -lsqlite3
 
 Sqlite3.class: Sqlite3.java
