@@ -72,12 +72,9 @@ class Sqlite(path: String) {
             def foreach(f: Element => Unit): Unit =
                 for (i <- 0 until res.columnCount())
                     f(elt(i))
-            def map[T](f: Element => T): List[T] = {
-              var r: List[T] = Nil
+            def map[T](f: Element => T): IndexedSeq[T] =
               for (i <- 0 until res.columnCount())
-                  r = f(elt(i)) :: r
-              r.reverse
-            }
+                  yield f(elt(i))
         }
         def foreach(f: Row => Unit): Unit =
             while (!done) {
