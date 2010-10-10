@@ -76,12 +76,28 @@ class Sqlite {
                 def asInt(): Int = { res.asInt(i); }
                 def asDouble(): Double = { res.asDouble(i); }
                 def asText(): String = { res.asText(i); }
+                override def toString(): String = {
+                    typ() match {
+                        case Sqlite3C.INTEGER => asInt.toString
+                        case Sqlite3C.FLOAT => asDouble.toString
+                        case Sqlite3C.TEXT => asText
+                        case Sqlite3C.NULL => "NULL"
+                        case _ => "???"
+                    }
+                }
             }
             def elt(i: Int): Element = { new Element(res, i); }
             def foreach(f: Element => Unit): Unit = {
                 for (i <- 0 until res.columnCount()) {
                     f(elt(i));
                 }
+            }
+            def map[T](f: Element => T): List[T] = {
+              var r: List[T] = Nil
+              for (i <- 0 until res.columnCount()) {
+                  r = f(elt(i)) :: r
+              }
+              r.reverse
             }
         }
         def foreach(f: Row => Unit): Unit = {
