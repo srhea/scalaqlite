@@ -1,3 +1,8 @@
+// Copyright (c) 2010 Sean C. Rhea <sean.c.rhea@gmail.com>
+// All rights reserved.
+//
+// See the file LICENSE included in this distribution for details.
+
 public class Sqlite3C {
     public static final int OK = 0;
     public static final int ROW = 100;

@@ -1,3 +1,7 @@
+# Copyright (c) 2010 Sean C. Rhea <sean.c.rhea@gmail.com>
+# All rights reserved.
+#
+# See the file LICENSE included in this distribution for details.
 
 all: Sqlite.class Sqlite3C.class libscalaqlite.dylib
 

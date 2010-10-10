@@ -1,3 +1,8 @@
+// Copyright (c) 2010 Sean C. Rhea <sean.c.rhea@gmail.com>
+// All rights reserved.
+//
+// See the file LICENSE included in this distribution for details.
+
 #include "Sqlite3C.h"
 #include <stdio.h>
 #include <string.h>

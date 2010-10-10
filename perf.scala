@@ -1,3 +1,8 @@
+// Copyright (c) 2010 Sean C. Rhea <sean.c.rhea@gmail.com>
+// All rights reserved.
+//
+// See the file LICENSE included in this distribution for details.
+
 var path = "test.db"
 var f = new java.io.File(path)
 if (f.exists) f.delete
