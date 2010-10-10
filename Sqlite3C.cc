@@ -3,6 +3,11 @@
 //
 // See the file LICENSE included in this distribution for details.
 
+// See the comments in Sqlite3C.java.  Also, the sqlite3 C/C++ interface
+// supports UTF-16 strings.  I would like to switch this file to use UTF-16,
+// as it would save Java the effort of converting to/from UTF-8, but I haven't
+// sorted out the details of byte ordering yet.
+
 #include "Sqlite3C.h"
 #include <stdio.h>
 #include <string.h>

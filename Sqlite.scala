@@ -3,6 +3,10 @@
 //
 // See the file LICENSE included in this distribution for details.
 
+// This file is the "meat" of scalaqlite.  I'm sure I should be doing something
+// more sophisticated about packages and file names, but I haven't quite sorted
+// out how they work in Scala yet.  Hopefully they're nicer than in Java.
+
 abstract class SqlValue
 case class SqlNull() extends SqlValue { override def toString: String = "NULL" }
 case class SqlInt(i: Int) extends SqlValue { override def toString: String = i.toString }

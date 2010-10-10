@@ -21,6 +21,8 @@ if you want to add up the values of the first column, you can do this:
         }
     }
 
+See test.scala for a more complete example.  You can run it with "make test".
+
 I'm pretty new to Scala, and I haven't written much Java in the last few
 years, so this library is definitely a work in progress.  Please send
 constructive feedback, and please be tolerant of interface changes as the
