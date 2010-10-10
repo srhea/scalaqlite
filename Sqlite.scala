@@ -18,9 +18,8 @@ class SqliteResultSet(dbc: SqliteDb, stmtc: Long) {
     private var stmt: Long = stmtc
     def done: Boolean = stmt == 0
     override def finalize: Unit = if (!done) Sqlite3C.finalize(stmt)
-    private def assertNotDone: Unit = if (done) throw new Exception("already done")
     def next: Unit = {
-        assertNotDone
+        assert(!done)
         val r = Sqlite3C.step(stmt)
         if (r == Sqlite3C.DONE) {
             Sqlite3C.finalize(stmt)
@@ -31,7 +30,7 @@ class SqliteResultSet(dbc: SqliteDb, stmtc: Long) {
         }
     }
     def row: IndexedSeq[SqlValue] = {
-        assertNotDone
+        assert(!done)
         for (i <- 0 until Sqlite3C.column_count(stmt))
             yield Sqlite3C.column_type(stmt, i) match {
                 case Sqlite3C.INTEGER => SqlInt(Sqlite3C.column_int(stmt, i))
@@ -51,22 +50,17 @@ class SqliteResultSet(dbc: SqliteDb, stmtc: Long) {
 
 class SqliteDb(path: String) {
     private val db = Array(0L)
-    assertSuccess("open", Sqlite3C.open(path, db))
-    private def assertSuccess(method: String, rc: Int): Unit =
-        if (rc != Sqlite3C.OK)
-            throw new Exception(method + " failed: " + Sqlite3C.errmsg(db(0)))
-    private def assertOpen: Unit = if (db(0) == 0) throw new Exception("db is not open")
+    Sqlite3C.open(path, db) ensuring (_ == Sqlite3C.OK)
     def close(): Unit = {
-        assertOpen
-        assertSuccess("close", Sqlite3C.close(db(0)))
+        assert(db(0) != 0)
+        Sqlite3C.close(db(0)) ensuring (_ == Sqlite3C.OK)
         db(0) = 0
     }
     override def finalize(): Unit = if (db(0) != 0) Sqlite3C.close(db(0))
     def query(sql: String): SqliteResultSet = {
-        assertOpen
+        assert(db(0) != 0)
         val stmt = Array(0L)
-        val rc = Sqlite3C.prepare_v2(db(0), sql, stmt)
-        assertSuccess("prepare", rc)
+        Sqlite3C.prepare_v2(db(0), sql, stmt) ensuring (_ == Sqlite3C.OK)
         val res = new SqliteResultSet(this, stmt(0))
         res.next
         res
