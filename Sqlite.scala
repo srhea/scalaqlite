@@ -1,5 +1,6 @@
-class Sqlite {
+class Sqlite(path: String) {
     private var db = Array(0L)
+    assertSuccess("open", Sqlite3C.open(path, db));
     private def assertSuccess(method: String, rc: Int): Unit = {
         if (rc != Sqlite3C.OK)
             throw new Exception(method + " failed: " + errmsg())
@@ -7,10 +8,6 @@ class Sqlite {
     private def assertOpen(): Unit = {
         if (db(0) == 0)
             throw new Exception("db is not open")
-    }
-    def open(path: String): Unit = {
-        val rc = Sqlite3C.open(path, db)
-        assertSuccess("open", rc);
     }
     def close(): Unit = {
         assertOpen()
