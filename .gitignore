@@ -1,5 +1,3 @@
-Sqlite$Result.class
-Sqlite.class
-Sqlite3C.class
+*.class
 Sqlite3C.h
-libSqlite3Java.dylib
+libscalaqlite.dylib

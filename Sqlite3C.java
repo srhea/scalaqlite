@@ -24,6 +24,6 @@ public class Sqlite3C {
     native static public String errmsg(long db);
 
     static {
-        System.loadLibrary("Sqlite3Java");
+        System.loadLibrary("scalaqlite");
     }
 }
