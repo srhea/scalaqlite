@@ -9,7 +9,7 @@ clean:
 	rm -f *.class Sqlite3C.h libscalaqlite.dylib
 
 test: all
-	scala-2.8 test.scala
+	scala test.scala
 
 .PHONY: all, clean, test
 
@@ -20,7 +20,7 @@ libscalaqlite.dylib: Sqlite3C.cc Sqlite3C.h
 		$< -lsqlite3
 
 Sqlite.class: Sqlite.scala Sqlite3C.class
-	scalac-2.8 $<
+	scalac $<
 
 Sqlite3C.class: Sqlite3C.java
 	javac $<
