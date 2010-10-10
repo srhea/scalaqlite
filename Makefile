@@ -2,12 +2,12 @@
 all: Sqlite.class Sqlite3C.class libSqlite3Java.dylib
 
 clean:
-	rm Sqlite.class Sqlite3C.class Sqlite3C.h libSqlite3Java.dylib
+	rm -f Sqlite.class Sqlite3C.class Sqlite3C.h libSqlite3Java.dylib
 
-run: Sqlite.class Sqlite3C.class libSqlite3Java.dylib
+test: all
 	scala-2.8 test.scala
 
-.PHONY: all, clean, run
+.PHONY: all, clean, test
 
 libSqlite3Java.dylib: Sqlite3C.cc Sqlite3C.h
 	g++ -dynamiclib -o $@ \
