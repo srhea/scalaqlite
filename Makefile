@@ -3,15 +3,27 @@
 #
 # See the file LICENSE included in this distribution for details.
 
-all: Sqlite.class Sqlite3C.class libscalaqlite.dylib
+ifeq ($(shell uname),Darwin)
+LIBEXT=dylib
+else
+LIBEXT=so
+endif
+
+all: SqliteDb.class Sqlite3C.class libscalaqlite.$(LIBEXT)
 
 clean:
-	rm -f *.class Sqlite3C.h libscalaqlite.dylib
+	rm -f *.class Sqlite3C.h libscalaqlite.$(LIBEXT)
 
 test: all
-	scala test.scala
+	LD_LIBRARY_PATH=. scala test.scala
 
 .PHONY: all, clean, test
+
+libscalaqlite.so: Sqlite3C.cc Sqlite3C.h
+	g++ -o $@ -shared -Wl,-soname,$@ \
+		-I/usr/lib/jvm/java-1.5.0-sun-1.5.0.22/include \
+		-I/usr/lib/jvm/java-1.5.0-sun-1.5.0.22/include/linux \
+		$< -static -lc -lsqlite3
 
 libscalaqlite.dylib: Sqlite3C.cc Sqlite3C.h
 	g++ -dynamiclib -o $@ \
@@ -19,7 +31,7 @@ libscalaqlite.dylib: Sqlite3C.cc Sqlite3C.h
 		-L/opt/local/lib \
 		$< -lsqlite3
 
-Sqlite.class: Sqlite.scala Sqlite3C.class
+SqliteDb.class: Sqlite.scala Sqlite3C.class
 	scalac $<
 
 Sqlite3C.class: Sqlite3C.java
