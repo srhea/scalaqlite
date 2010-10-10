@@ -6,8 +6,8 @@ Java libraries out there, but they're all very Java-ish, and I'm not crazy
 about Java.
 
 This library is intended to give a very Scala-ish interface to Sqlite.  For
-example, to print all the rows in table "foo" with the columns separated by
-spaces you can write:
+example, you can use the follwing code to print all the rows in table "foo"
+with the columns separated by spaces:
 
     for (row <- db.query("SELECT * FROM foo;"))
         println(row.map(_.toString).mkString(" "))
