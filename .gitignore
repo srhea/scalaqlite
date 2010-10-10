@@ -1,3 +1,4 @@
 *.class
 Sqlite3C.h
 libscalaqlite.dylib
+libscalaqlite.so
