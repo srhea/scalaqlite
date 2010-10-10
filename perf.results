@@ -1,0 +1,15 @@
+On a MacBook with a 2.2 GHz Intel Core 2 Duo, using gcc 4.0.1 with -O2,
+Scala 2.8, Java 1.5.0, and Ruby 1.8.7:
+
+$ ruby perf.rb
+inserts took 5405.54 ms: 18499.5393614699 rows/s
+query took 3273.065 ms: 30552.4027173307 rows/s
+$ scala perf.scala
+inserts took 2480 ms: 40322.58064516129 rows/s
+query took 323 ms: 309597.52321981423 rows/s
+$ ./perf.out
+inserts took 1720.982000 ms: 58106.360206 rows/s
+query took 36.568000 ms: 2734631.371691 rows/s
+
+So the Scala version is 10X faster than the Ruby one,
+and the C++ version is 9X faster than the Scala one.
