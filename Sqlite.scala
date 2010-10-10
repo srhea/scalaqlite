@@ -17,7 +17,20 @@ class Sqlite(path: String) {
         db(0) = 0
     }
     override def finalize(): Unit = if (db(0) != 0) Sqlite3C.close(db(0))
-
+    def query(sql: String): Result = {
+        assertOpen
+        var stmt = Array(0L)
+        val rc = Sqlite3C.prepare_v2(db(0), sql, stmt)
+        assertSuccess("prepare", rc)
+        var res = new Result(this, stmt(0))
+        res.next
+        res
+    }
+    def execute(sql: String): Unit = {
+        var stmt = query(sql)
+        while (!stmt.done)
+            stmt.next
+    }
     class Result(dbc: Sqlite, stmtc: Long) {
         private val db: Sqlite = dbc
         private var stmt: Long = stmtc
@@ -52,19 +65,5 @@ class Sqlite(path: String) {
                 next
             }
         }
-    }
-    def query(sql: String): Result = {
-        assertOpen
-        var stmt = Array(0L)
-        val rc = Sqlite3C.prepare_v2(db(0), sql, stmt)
-        assertSuccess("prepare", rc)
-        var res = new Result(this, stmt(0))
-        res.next
-        res
-    }
-    def execute(sql: String): Unit = {
-        var stmt = query(sql)
-        while (!stmt.done)
-            stmt.next
     }
 }
