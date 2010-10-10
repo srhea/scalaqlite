@@ -67,6 +67,29 @@ class Sqlite {
             assertNotDone()
             Sqlite3C.column_text(stmt, i)
         }
+        class Row(resc: Result) {
+            private val res = resc;
+            class Element(resc: Result, ic: Int) {
+                private val res = resc;
+                private val i = ic;
+                def typ(): Int = { res.columnType(i); }
+                def asInt(): Int = { res.asInt(i); }
+                def asDouble(): Double = { res.asDouble(i); }
+                def asText(): String = { res.asText(i); }
+            }
+            def elt(i: Int): Element = { new Element(res, i); }
+            def foreach(f: Element => Unit): Unit = {
+                for (i <- 0 until res.columnCount()) {
+                    f(elt(i));
+                }
+            }
+        }
+        def foreach(f: Row => Unit): Unit = {
+            while (!done()) {
+                f(new Row(this))
+                next()
+            }
+        }
     }
     def query(sql: String): Result = {
         assertOpen()

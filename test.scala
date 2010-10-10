@@ -4,22 +4,22 @@ db.execute("create table foo (i integer, f double, t text);")
 db.execute("insert into foo (i, f, t) values (1, 2.0, 'foo');")
 db.execute("insert into foo (i, f, t) values (3, NULL, 'bar');")
 var res = db.query("select * from foo")
-while (!res.done()) {
-    var i = 0;
-    while (i < res.columnCount()) {
-        if (i != 0)
+for (row <- res) {
+    var first = true;
+    for (elt <- row) {
+        if (first)
+            first = false
+        else
             System.out.print(" ")
-        val s = res.columnType(i) match {
-            case Sqlite3C.INTEGER => res.asInt(i).toString
-            case Sqlite3C.FLOAT => res.asDouble(i).toString
-            case Sqlite3C.TEXT => res.asText(i)
+        val s = elt.typ() match {
+            case Sqlite3C.INTEGER => elt.asInt.toString
+            case Sqlite3C.FLOAT => elt.asDouble.toString
+            case Sqlite3C.TEXT => elt.asText
             case Sqlite3C.NULL => "NULL"
             case _ => "???"
         }
         System.out.print(s)
-        i = i + 1
     }
     System.out.println()
-    res.next()
 }
 db.close()
