@@ -1,0 +1,29 @@
+scalaqlite - A native Scala library for using Sqlite3
+
+I recently wanted to use Sqlite from within Scala for a little project I'm
+working on, and I couldn't find any Scala libraries for doing so.  There are
+Java libraries out there, but they're all very Java-ish, and I'm not crazy
+about Java.
+
+This library is intended to give a very Scala-ish interface to Sqlite.  For
+example, you can write:
+
+    for (row <- db.query("SELECT * FROM foo;"))
+        println(row.map(_.toString).reduceLeft(_ + " " + _))
+
+To print all the rows in table "foo" with the columns separated by spaces.  Or
+if you want to add up the values of the first column, you can do this:
+
+    for (row <- db.query("SELECT * FROM foo;")) {
+        row(0) match {
+            case SqlInt(i) => sum += i
+            case _ => throw new Exception("expected an int")
+        }
+    }
+
+I'm pretty new to Scala, and I haven't written much Java in the last few
+years, so this library is definitely a work in progress.  Please send
+constructive feedback, and please be tolerant of interface changes as the
+library matures.
+
+Sean
