@@ -32,7 +32,7 @@ libscalaqlite.dylib: Sqlite3C.cc Sqlite3C.h
 		$< -lsqlite3
 
 SqliteDb.class: Sqlite.scala Sqlite3C.class
-	scalac $<
+	fsc $<
 
 Sqlite3C.class: Sqlite3C.java
 	javac $<
