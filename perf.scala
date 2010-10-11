@@ -25,4 +25,4 @@ for (row <- db.query("SELECT * FROM foo;")) {
 if (count != sum) throw new Exception("count and sum don't match")
 lat = java.lang.System.currentTimeMillis - start
 println("query took " + lat + " ms: " + (count / (lat / 1000.0)) + " rows/s")
-db.close
+db.close()

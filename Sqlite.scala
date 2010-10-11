@@ -8,17 +8,17 @@
 // out how they work in Scala yet.  Hopefully they're nicer than in Java.
 
 abstract class SqlValue
-case class SqlNull() extends SqlValue { override def toString: String = "NULL" }
-case class SqlInt(i: Int) extends SqlValue { override def toString: String = i.toString }
-case class SqlDouble(d: Double) extends SqlValue { override def toString: String = d.toString }
-case class SqlText(s: String) extends SqlValue { override def toString: String = s }
+case class SqlNull() extends SqlValue { override def toString = "NULL" }
+case class SqlInt(i: Int) extends SqlValue { override def toString = i.toString }
+case class SqlDouble(d: Double) extends SqlValue { override def toString = d.toString }
+case class SqlText(s: String) extends SqlValue { override def toString = s }
 
 class SqliteResultSet(dbc: SqliteDb, stmtc: Long) {
     private val db: SqliteDb = dbc
     private var stmt: Long = stmtc
-    def done: Boolean = stmt == 0
-    override def finalize: Unit = if (!done) Sqlite3C.finalize(stmt)
-    def next: Unit = {
+    def done = stmt == 0
+    override def finalize() { if (!done) Sqlite3C.finalize(stmt) }
+    def next() {
         assert(!done)
         val r = Sqlite3C.step(stmt)
         if (r == Sqlite3C.DONE) {
@@ -40,32 +40,28 @@ class SqliteResultSet(dbc: SqliteDb, stmtc: Long) {
                 case _ => throw new Exception("unsupported type")
             }
     }
-    def foreach(f: IndexedSeq[SqlValue] => Unit): Unit = {
-        while (!done) {
-            f(row)
-            next
-        }
-    }
+    def foreach(f: IndexedSeq[SqlValue] => Unit) { while (!done) { f(row); next() } }
 }
 
 class SqliteDb(path: String) {
     private val db = Array(0L)
     Sqlite3C.open(path, db) ensuring (_ == Sqlite3C.OK)
-    def close(): Unit = {
+    def close() {
         assert(db(0) != 0)
         Sqlite3C.close(db(0)) ensuring (_ == Sqlite3C.OK)
         db(0) = 0
     }
-    override def finalize(): Unit = if (db(0) != 0) Sqlite3C.close(db(0))
+    override def finalize() { if (db(0) != 0) Sqlite3C.close(db(0)) }
     def query(sql: String): SqliteResultSet = {
         assert(db(0) != 0)
         val stmt = Array(0L)
         Sqlite3C.prepare_v2(db(0), sql, stmt) ensuring (_ == Sqlite3C.OK)
         val res = new SqliteResultSet(this, stmt(0))
-        res.next
+        res.next()
         res
     }
-    def execute(sql: String): Unit = for (row <- query(sql)) ()
-    def enableLoadExtension(on: Boolean): Unit =
+    def execute(sql: String) { for (row <- query(sql)) () }
+    def enableLoadExtension(on: Boolean) {
         Sqlite3C.enable_load_extension(db(0), if (on) 1 else 0)
+    }
 }
