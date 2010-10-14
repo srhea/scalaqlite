@@ -24,7 +24,7 @@ class SqliteResultSet(db: SqliteDb, private var stmt: Long) {
             stmt = 0
         }
         else if (r != Sqlite3C.ROW) {
-            throw new Exception("unexpected result: " + r)
+            error("unexpected result: " + r)
         }
     }
     def row: IndexedSeq[SqlValue] = {
@@ -35,7 +35,7 @@ class SqliteResultSet(db: SqliteDb, private var stmt: Long) {
                 case Sqlite3C.FLOAT => SqlDouble(Sqlite3C.column_double(stmt, i))
                 case Sqlite3C.TEXT => SqlText(Sqlite3C.column_text(stmt, i))
                 case Sqlite3C.NULL => SqlNull()
-                case _ => throw new Exception("unsupported type")
+                case _ => error("unsupported type")
             }
     }
     def foreach(f: IndexedSeq[SqlValue] => Unit) { while (!done) { f(row); next() } }
