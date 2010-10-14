@@ -13,8 +13,7 @@ case class SqlInt(i: Int) extends SqlValue { override def toString = i.toString 
 case class SqlDouble(d: Double) extends SqlValue { override def toString = d.toString }
 case class SqlText(s: String) extends SqlValue { override def toString = s }
 
-class SqliteResultSet(db: SqliteDb, stmtc: Long) {
-    private var stmt: Long = stmtc
+class SqliteResultSet(db: SqliteDb, private var stmt: Long) {
     def done = stmt == 0
     override def finalize() { if (!done) Sqlite3C.finalize(stmt) }
     def next() {
