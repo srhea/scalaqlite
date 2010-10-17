@@ -9,18 +9,17 @@ else
 LIBEXT=so
 endif
 
-all: SqliteDb.class Sqlite3C.class libscalaqlite.$(LIBEXT)
+TARGET=libscalaqlite.$(LIBEXT)
+
+all: $(TARGET)
 
 clean:
-	rm -f *.class Sqlite3C.h libscalaqlite.$(LIBEXT) perf.out
+	rm -f Sqlite3C.h $(TARGET)
 
-test: all
-	LD_LIBRARY_PATH=. scala test.scala
-
-.PHONY: all, clean, test
+.PHONY: all, clean
 
 libscalaqlite.so: Sqlite3C.cc Sqlite3C.h
-	g++ -O2 -o $@ -shared -Wl,-soname,$@ \
+	g++ -O2 -o $@ -shared -Wl,-soname,libscalaqlite.so \
 		-I/usr/lib/jvm/java-1.5.0-sun-1.5.0.22/include \
 		-I/usr/lib/jvm/java-1.5.0-sun-1.5.0.22/include/linux \
 		$< -static -lc -lsqlite3
@@ -31,14 +30,5 @@ libscalaqlite.dylib: Sqlite3C.cc Sqlite3C.h
 		-L/opt/local/lib \
 		$< -lsqlite3
 
-SqliteDb.class: Sqlite.scala Sqlite3C.class
-	fsc $<
-
-Sqlite3C.class: Sqlite3C.java
-	javac $<
-
-Sqlite3C.h: Sqlite3C.java
-	javah -jni Sqlite3C
-
-perf.out: perf.cc
-	g++ -O2 -o $@ $< -lsqlite3
+Sqlite3C.h: ../classes/Sqlite3C.class
+	javah -classpath ../classes Sqlite3C
