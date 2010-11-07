@@ -14,6 +14,7 @@
 
 public class Sqlite3C {
     public static final int OK = 0;
+    public static final int ERROR = 1;
     public static final int ROW = 100;
     public static final int DONE = 101;
 

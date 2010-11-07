@@ -23,6 +23,9 @@ class SqliteResultSet(db: SqliteDb, private var stmt: Long) {
             Sqlite3C.finalize(stmt)
             stmt = 0
         }
+        else if (r == Sqlite3C.ERROR) {
+            error("sqlite error: " + db.errmsg)
+        }
         else if (r != Sqlite3C.ROW) {
             error("unexpected result: " + r)
         }
@@ -44,17 +47,17 @@ class SqliteResultSet(db: SqliteDb, private var stmt: Long) {
 
 class SqliteDb(path: String) {
     private val db = Array(0L)
-    Sqlite3C.open(path, db) ensuring (_ == Sqlite3C.OK, Sqlite3C.errmsg(db(0)))
+    Sqlite3C.open(path, db) ensuring (_ == Sqlite3C.OK, errmsg)
     def close() {
         assert(db(0) != 0, "already closed")
-        Sqlite3C.close(db(0)) ensuring (_ == Sqlite3C.OK, Sqlite3C.errmsg(db(0)))
+        Sqlite3C.close(db(0)) ensuring (_ == Sqlite3C.OK, errmsg)
         db(0) = 0
     }
     override def finalize() { if (db(0) != 0) Sqlite3C.close(db(0)) }
     def query(sql: String): SqliteResultSet = {
         assert(db(0) != 0, "db is closed")
         val stmt = Array(0L)
-        Sqlite3C.prepare_v2(db(0), sql, stmt) ensuring (_ == Sqlite3C.OK, Sqlite3C.errmsg(db(0)))
+        Sqlite3C.prepare_v2(db(0), sql, stmt) ensuring (_ == Sqlite3C.OK, errmsg)
         val res = new SqliteResultSet(this, stmt(0))
         res.next()
         res
@@ -63,4 +66,5 @@ class SqliteDb(path: String) {
     def enableLoadExtension(on: Boolean) {
         Sqlite3C.enable_load_extension(db(0), if (on) 1 else 0)
     }
+    def errmsg: String = if (db(0) == 0) "db not open" else Sqlite3C.errmsg(db(0))
 }
