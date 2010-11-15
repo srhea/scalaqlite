@@ -43,6 +43,24 @@ class SqliteResultSet(db: SqliteDb, private var stmt: Long) {
         }
     }
     def foreach(f: IndexedSeq[SqlValue] => Unit) { while (!done) { f(row); next() } }
+    def map[T](f: IndexedSeq[SqlValue] => T): List[T] = {
+      val result = new ListBuffer[T]
+      while (!done) {
+        result += f(row)
+        next()
+      }
+      result.toList
+    }
+    def filter(f: IndexedSeq[SqlValue] => Boolean): List[IndexedSeq[SqlValue]] = {
+      val result = new ListBuffer[IndexedSeq[SqlValue]]
+      while (!done) {
+        val r = row
+        if (f(r))
+          result += r
+        next()
+      }
+      result.toList
+    }
 }
 
 class SqliteDb(path: String) {
