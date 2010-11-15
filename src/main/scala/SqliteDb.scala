@@ -7,10 +7,29 @@
 // more sophisticated about packages and file names, but I haven't quite sorted
 // out how they work in Scala yet.  Hopefully they're nicer than in Java.
 
-abstract class SqlValue
-case class SqlNull() extends SqlValue { override def toString = "NULL" }
-case class SqlInt(i: Int) extends SqlValue { override def toString = i.toString }
-case class SqlDouble(d: Double) extends SqlValue { override def toString = d.toString }
+import scala.collection.mutable.ListBuffer
+
+class SqlException(msg: String) extends Exception(msg)
+
+abstract class SqlValue {
+  def toDouble: Double = throw new SqlException(toString + " is not a double")
+  def toInt: Int = throw new SqlException(toString + " is not an int")
+  def isNull = false
+}
+case class SqlNull() extends SqlValue {
+  override def toString = "NULL"
+  override def isNull = true
+}
+case class SqlInt(i: Int) extends SqlValue {
+  override def toString = i.toString
+  override def toDouble = i
+  override def toInt = i
+}
+case class SqlDouble(d: Double) extends SqlValue {
+  override def toString = d.toString
+  override def toDouble = d
+  override def toInt = if (d.round == d) d.toInt else super.toInt
+}
 case class SqlText(s: String) extends SqlValue { override def toString = s }
 
 class SqliteResultSet(db: SqliteDb, private var stmt: Long) {
