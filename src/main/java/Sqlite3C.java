@@ -34,7 +34,7 @@ public class Sqlite3C {
     native static public String column_name(long stmt, int n);
     native static public int column_type(long stmt, int n);
     native static public int column_int(long stmt, int n);
-    native static public float column_double(long stmt, int n);
+    native static public double column_double(long stmt, int n);
     native static public String column_text(long stmt, int n);
     native static public String errmsg(long db);
 

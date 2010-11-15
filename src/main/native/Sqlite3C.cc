@@ -102,7 +102,7 @@ Java_Sqlite3C_column_1int(JNIEnv *env, jclass cls, jlong jstmt, jint n)
     return sqlite3_column_int(stmt, n);
 }
 
-JNIEXPORT jfloat JNICALL
+JNIEXPORT jdouble JNICALL
 Java_Sqlite3C_column_1double(JNIEnv *env, jclass cls, jlong jstmt, jint n)
 {
     sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
