@@ -25,4 +25,19 @@ class SqliteDbSpec extends FlatSpec with ShouldMatchers {
             list = row.map(_.toString).mkString(" ") :: list
         list.reverse.mkString("\n") should equal ("1 2.0 foo\n3 NULL bar")
     }
+
+    "SqliteResultSet.map" should "work" in {
+        val s = db.query("SELECT * FROM foo;").map(_.mkString(" ")).mkString("\n")
+        s should equal ("1 2.0 foo\n3 NULL bar")
+    }
+
+    "SqliteResultSet.filter" should "work" in {
+        for (row <- db.query("SELECT * FROM foo;") if row(2).toString == "bar")
+          row.mkString(" ") should equal ("3 NULL bar")
+    }
+
+    "doubles" should "have full precision" in {
+        val d = db.query("SELECT 1234567890123.0;").map(_.map( _.toDouble)).head.head
+        d should equal (1234567890123.0)
+    }
 }
