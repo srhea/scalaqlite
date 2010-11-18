@@ -7,6 +7,7 @@
 // more sophisticated about packages and file names, but I haven't quite sorted
 // out how they work in Scala yet.  Hopefully they're nicer than in Java.
 
+package org.srhea.scalaqlite
 import scala.collection.mutable.ListBuffer
 
 class SqlException(msg: String) extends Exception(msg)

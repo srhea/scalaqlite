@@ -3,6 +3,7 @@
 //
 // See the file LICENSE included in this distribution for details.
 
+package org.srhea.scalaqlite
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 

@@ -12,6 +12,8 @@
 // it to work.  And SWIG seems to save effort only if you're making wrappers
 // for multiple languages.  Luckily there aren't too many functions to wrap.
 
+package org.srhea.scalaqlite;
+
 public class Sqlite3C {
     public static final int OK = 0;
     public static final int ERROR = 1;
