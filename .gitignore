@@ -5,3 +5,5 @@ libscalaqlite.so
 perf.out
 target
 reports
+lib_managed
+project/boot
