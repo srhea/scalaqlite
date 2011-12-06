@@ -17,7 +17,7 @@ class SqliteDbSpec extends FlatSpec with ShouldMatchers {
     "INSERT" should "add rows to the table" in {
         db.execute("INSERT INTO foo (i, f, t) VALUES (1, 2.0, 'foo');")
         db.execute("INSERT INTO foo (i, f, t) VALUES (3, NULL, 'bar');")
-        db.query("SELECT count(*) FROM foo;").row(0) should equal (SqlInt(2))
+        db.query("SELECT count(*) FROM foo;").toSeq.head.head should equal (SqlInt(2))
     }
 
     "SELECT *" should "output all the rows" in {
@@ -38,7 +38,7 @@ class SqliteDbSpec extends FlatSpec with ShouldMatchers {
     }
 
     "doubles" should "have full precision" in {
-        val d = db.query("SELECT 1234567890123.0;").map(_.map( _.toDouble)).head.head
+        val d = db.query("SELECT 1234567890123.0;").map(_.map(_.toDouble)).toSeq.head.head
         d should equal (1234567890123.0)
     }
 }

@@ -33,53 +33,48 @@ case class SqlDouble(d: Double) extends SqlValue {
 }
 case class SqlText(s: String) extends SqlValue { override def toString = s }
 
-class SqliteResultSet(db: SqliteDb, private var stmt: Long) {
-    def done = stmt == 0
-    override def finalize() { if (!done) Sqlite3C.finalize(stmt) }
-    def next() {
-        assert(!done, "already done")
-        val r = Sqlite3C.step(stmt)
-        if (r == Sqlite3C.DONE) {
+class SqliteResultIterator(db: SqliteDb, private var stmt: Long)
+    extends Iterator[IndexedSeq[SqlValue]]
+{
+    private var cachedRow: IndexedSeq[SqlValue] = null
+
+    assert(stmt != 0)
+    advance()
+
+    private def advance() {
+        cachedRow = Sqlite3C.step(stmt) match {
+            case Sqlite3C.ROW =>
+                (0 until Sqlite3C.column_count(stmt)).map { i =>
+                    Sqlite3C.column_type(stmt, i) match {
+                        case Sqlite3C.INTEGER => SqlInt(Sqlite3C.column_int(stmt, i))
+                        case Sqlite3C.FLOAT => SqlDouble(Sqlite3C.column_double(stmt, i))
+                        case Sqlite3C.TEXT => SqlText(Sqlite3C.column_text(stmt, i))
+                        case Sqlite3C.NULL => SqlNull()
+                        case _ => error("unsupported type")
+                    }
+                }
+            case Sqlite3C.DONE =>
+                Sqlite3C.finalize(stmt)
+                null
+            case Sqlite3C.ERROR =>
+                error("sqlite error: " + db.errmsg)
+            case other =>
+                error("unexpected result: " + other)
+        }
+    }
+
+    def hasNext = cachedRow != null
+
+    def next: IndexedSeq[SqlValue] = {
+        assert(hasNext)
+        val result = cachedRow
+        advance()
+        result
+    }
+
+    override def finalize() {
+        if (hasNext)
             Sqlite3C.finalize(stmt)
-            stmt = 0
-        }
-        else if (r == Sqlite3C.ERROR) {
-            error("sqlite error: " + db.errmsg)
-        }
-        else if (r != Sqlite3C.ROW) {
-            error("unexpected result: " + r)
-        }
-    }
-    def row: IndexedSeq[SqlValue] = {
-        assert(!done, "already done")
-        (0 until Sqlite3C.column_count(stmt)).map { i =>
-            Sqlite3C.column_type(stmt, i) match {
-                case Sqlite3C.INTEGER => SqlInt(Sqlite3C.column_int(stmt, i))
-                case Sqlite3C.FLOAT => SqlDouble(Sqlite3C.column_double(stmt, i))
-                case Sqlite3C.TEXT => SqlText(Sqlite3C.column_text(stmt, i))
-                case Sqlite3C.NULL => SqlNull()
-                case _ => error("unsupported type")
-            }
-        }
-    }
-    def foreach(f: IndexedSeq[SqlValue] => Unit) { while (!done) { f(row); next() } }
-    def map[T](f: IndexedSeq[SqlValue] => T): List[T] = {
-      val result = new ListBuffer[T]
-      while (!done) {
-        result += f(row)
-        next()
-      }
-      result.toList
-    }
-    def filter(f: IndexedSeq[SqlValue] => Boolean): List[IndexedSeq[SqlValue]] = {
-      val result = new ListBuffer[IndexedSeq[SqlValue]]
-      while (!done) {
-        val r = row
-        if (f(r))
-          result += r
-        next()
-      }
-      result.toList
     }
 }
 
@@ -92,13 +87,11 @@ class SqliteDb(path: String) {
         db(0) = 0
     }
     override def finalize() { if (db(0) != 0) Sqlite3C.close(db(0)) }
-    def query(sql: String): SqliteResultSet = {
+    def query(sql: String): Iterator[IndexedSeq[SqlValue]] = {
         assert(db(0) != 0, "db is closed")
         val stmt = Array(0L)
         Sqlite3C.prepare_v2(db(0), sql, stmt) ensuring (_ == Sqlite3C.OK, errmsg)
-        val res = new SqliteResultSet(this, stmt(0))
-        res.next()
-        res
+        new SqliteResultIterator(this, stmt(0))
     }
     def execute(sql: String) { for (row <- query(sql)) () }
     def enableLoadExtension(on: Boolean) {
