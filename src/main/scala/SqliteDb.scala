@@ -50,16 +50,16 @@ class SqliteResultIterator(db: SqliteDb, private var stmt: Long)
                         case Sqlite3C.FLOAT => SqlDouble(Sqlite3C.column_double(stmt, i))
                         case Sqlite3C.TEXT => SqlText(Sqlite3C.column_text(stmt, i))
                         case Sqlite3C.NULL => SqlNull()
-                        case _ => error("unsupported type")
+                        case _ => sys.error("unsupported type")
                     }
                 }
             case Sqlite3C.DONE =>
                 Sqlite3C.finalize(stmt)
                 null
             case Sqlite3C.ERROR =>
-                error("sqlite error: " + db.errmsg)
+                sys.error("sqlite error: " + db.errmsg)
             case other =>
-                error("unexpected result: " + other)
+                sys.error("unexpected result: " + other)
         }
     }
 
