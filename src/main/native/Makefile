@@ -30,5 +30,5 @@ libscalaqlite.dylib: Sqlite3C.cc Sqlite3C.h
 		-L/opt/local/lib \
 		$< -lsqlite3
 
-Sqlite3C.h: ../../target/scala_2.9.1/classes/org/srhea/scalaqlite/Sqlite3C.class
-	javah -classpath ../../target/scala_2.9.1/classes org.srhea.scalaqlite.Sqlite3C
+Sqlite3C.h: ../../../target/scala-2.9.1/classes/org/srhea/scalaqlite/Sqlite3C.class
+	javah -classpath ../../../target/scala-2.9.1/classes org.srhea.scalaqlite.Sqlite3C
