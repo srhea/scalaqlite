@@ -20,8 +20,8 @@ clean:
 
 libscalaqlite.so: Sqlite3C.cc Sqlite3C.h
 	g++ -O2 -o $@ -shared -Wl,-soname,libscalaqlite.so \
-		-I/usr/lib/jvm/java-1.5.0-sun-1.5.0.22/include \
-		-I/usr/lib/jvm/java-1.5.0-sun-1.5.0.22/include/linux \
+	        -I/usr/lib/jvm/java-6-sun-1.6.0.26/include \
+	        -I/usr/lib/jvm/java-6-sun-1.6.0.26/include/linux \
 		$< -static -lc -lsqlite3
 
 libscalaqlite.dylib: Sqlite3C.cc Sqlite3C.h
