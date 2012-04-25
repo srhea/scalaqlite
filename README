@@ -31,4 +31,7 @@ the tests like this:
 
   LD_LIBRARY_PATH=./target/native sbt test
 
+If you want to avoid compiling the native code and setting LD_LIBRARY_PATH, at
+the cost of some performance, check out the jna branch.
+
 Sean
