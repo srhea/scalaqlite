@@ -57,4 +57,10 @@ class SqliteDbSpec extends FlatSpec with ShouldMatchers {
       db.query("SELECT " + Integer.MIN_VALUE + ";").toSeq.head.head.isInstanceOf[SqlInt] should equal (true)
       db.query("SELECT " + Integer.MAX_VALUE + ";").toSeq.head.head.isInstanceOf[SqlInt] should equal (true)
     }
+
+    "values that don't fit in an int" should "throw an exception on toInt" in {
+      intercept[SqlException] {
+        db.query("SELECT " + (Integer.MAX_VALUE + 1L) + ";").toSeq.head.head.toInt
+      }
+    }
 }
