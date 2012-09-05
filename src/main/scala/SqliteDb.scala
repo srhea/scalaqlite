@@ -3,10 +3,6 @@
 //
 // See the file LICENSE included in this distribution for details.
 
-// This file is the "meat" of scalaqlite.  I'm sure I should be doing something
-// more sophisticated about packages and file names, but I haven't quite sorted
-// out how they work in Scala yet.  Hopefully they're nicer than in Java.
-
 package org.srhea.scalaqlite
 import scala.collection.mutable.ListBuffer
 
