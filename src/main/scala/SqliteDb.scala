@@ -15,6 +15,7 @@ class SqlException(msg: String) extends Exception(msg)
 abstract class SqlValue {
   def toDouble: Double = throw new SqlException(toString + " is not a double")
   def toInt: Int = throw new SqlException(toString + " is not an int")
+  def toLong: Long = throw new SqlException(toString + " is not an long")
   def isNull = false
 }
 case class SqlNull() extends SqlValue {
@@ -25,11 +26,20 @@ case class SqlInt(i: Int) extends SqlValue {
   override def toString = i.toString
   override def toDouble = i
   override def toInt = i
+  override def toLong = i
+}
+case class SqlLong(i: Long) extends SqlValue {
+  override def toString = i.toString
+  override def toDouble = i
+  override def toInt =
+    if (i <= Integer.MAX_VALUE && i >= Integer.MIN_VALUE) i.toInt else super.toInt
+  override def toLong = i
 }
 case class SqlDouble(d: Double) extends SqlValue {
   override def toString = d.toString
   override def toDouble = d
   override def toInt = if (d.round == d) d.toInt else super.toInt
+  override def toLong = if (d.round == d) d.toLong else super.toLong
 }
 case class SqlText(s: String) extends SqlValue { override def toString = s }
 
@@ -46,7 +56,12 @@ class SqliteResultIterator(db: SqliteDb, private var stmt: Long)
             case Sqlite3C.ROW =>
                 (0 until Sqlite3C.column_count(stmt)).map { i =>
                     Sqlite3C.column_type(stmt, i) match {
-                        case Sqlite3C.INTEGER => SqlInt(Sqlite3C.column_int(stmt, i))
+                        case Sqlite3C.INTEGER =>
+                          val j = Sqlite3C.column_int64(stmt, i)
+                          if (j <= Integer.MAX_VALUE && j >= Integer.MIN_VALUE)
+                            SqlInt(j.toInt)
+                          else
+                            SqlLong(j)
                         case Sqlite3C.FLOAT => SqlDouble(Sqlite3C.column_double(stmt, i))
                         case Sqlite3C.TEXT => SqlText(Sqlite3C.column_text(stmt, i))
                         case Sqlite3C.NULL => SqlNull()

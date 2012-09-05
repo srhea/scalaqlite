@@ -102,6 +102,13 @@ Java_org_srhea_scalaqlite_Sqlite3C_column_1int(JNIEnv *env, jclass cls, jlong js
     return sqlite3_column_int(stmt, n);
 }
 
+JNIEXPORT jlong JNICALL
+Java_org_srhea_scalaqlite_Sqlite3C_column_1int64(JNIEnv *env, jclass cls, jlong jstmt, jint n)
+{
+    sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
+    return sqlite3_column_int64(stmt, n);
+}
+
 JNIEXPORT jdouble JNICALL
 Java_org_srhea_scalaqlite_Sqlite3C_column_1double(JNIEnv *env, jclass cls, jlong jstmt, jint n)
 {

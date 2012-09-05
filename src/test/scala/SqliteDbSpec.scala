@@ -41,4 +41,20 @@ class SqliteDbSpec extends FlatSpec with ShouldMatchers {
         val d = db.query("SELECT 1234567890123.0;").map(_.map(_.toDouble)).toSeq.head.head
         d should equal (1234567890123.0)
     }
+
+    "longs" should "have full precision" in {
+        val low = Integer.MIN_VALUE - 1L
+        val high = Integer.MAX_VALUE + 1L
+        val i = db.query("SELECT " + low + ";").toSeq.head.head
+        i.isInstanceOf[SqlLong] should equal (true)
+        i.toLong should equal (low)
+        val j = db.query("SELECT " + high + ";").toSeq.head.head
+        j.isInstanceOf[SqlLong] should equal (true)
+        j.toLong should equal (high)
+    }
+
+    "values that fit in an int" should "be returned as an int" in {
+      db.query("SELECT " + Integer.MIN_VALUE + ";").toSeq.head.head.isInstanceOf[SqlInt] should equal (true)
+      db.query("SELECT " + Integer.MAX_VALUE + ";").toSeq.head.head.isInstanceOf[SqlInt] should equal (true)
+    }
 }
