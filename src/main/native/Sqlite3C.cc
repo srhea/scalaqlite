@@ -50,8 +50,7 @@ Java_org_srhea_scalaqlite_Sqlite3C_prepare_1v2(
     jboolean iscopy;
     const char *csql = env->GetStringUTFChars(jsql, &iscopy);
     sqlite3_stmt *stmt;
-    // XXX: does strlen work with UTF8?
-    int r = sqlite3_prepare_v2(db, csql, strlen(csql), &stmt, NULL);
+    int r = sqlite3_prepare_v2(db, csql, -1, &stmt, NULL);
     if (r == SQLITE_OK) {
         jlong a[] = {(jlong) stmt};
         env->SetLongArrayRegion(jstmt, 0, 1, a);
