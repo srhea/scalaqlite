@@ -33,9 +33,7 @@ public class Sqlite3C {
     native static public int step(long stmt);
     native static public int finalize(long stmt);
     native static public int column_count(long stmt);
-    native static public String column_name(long stmt, int n);
     native static public int column_type(long stmt, int n);
-    native static public int column_int(long stmt, int n);
     native static public long column_int64(long stmt, int n);
     native static public double column_double(long stmt, int n);
     native static public String column_text(long stmt, int n);
