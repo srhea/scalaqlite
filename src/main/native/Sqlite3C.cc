@@ -80,25 +80,11 @@ Java_org_srhea_scalaqlite_Sqlite3C_column_1count(JNIEnv *env, jclass cls, jlong 
     return sqlite3_column_count(stmt);
 }
 
-JNIEXPORT jstring JNICALL
-Java_org_srhea_scalaqlite_Sqlite3C_column_1name(JNIEnv *env, jclass cls, jlong jstmt, jint n)
-{
-    sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
-    return env->NewStringUTF(sqlite3_column_name(stmt, n));
-}
-
 JNIEXPORT jint JNICALL
 Java_org_srhea_scalaqlite_Sqlite3C_column_1type(JNIEnv *env, jclass cls, jlong jstmt, jint n)
 {
     sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
     return sqlite3_column_type(stmt, n);
-}
-
-JNIEXPORT jint JNICALL
-Java_org_srhea_scalaqlite_Sqlite3C_column_1int(JNIEnv *env, jclass cls, jlong jstmt, jint n)
-{
-    sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
-    return sqlite3_column_int(stmt, n);
 }
 
 JNIEXPORT jlong JNICALL
