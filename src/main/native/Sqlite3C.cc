@@ -101,11 +101,14 @@ Java_org_srhea_scalaqlite_Sqlite3C_column_1double(JNIEnv *env, jclass cls, jlong
     return sqlite3_column_double(stmt, n);
 }
 
-JNIEXPORT jstring JNICALL
-Java_org_srhea_scalaqlite_Sqlite3C_column_1text(JNIEnv *env, jclass cls, jlong jstmt, jint n)
+JNIEXPORT jbyteArray JNICALL Java_org_srhea_scalaqlite_Sqlite3C_column_1blob
+  (JNIEnv *env, jclass cls, jlong jstmt, jint n)
 {
     sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
-    return env->NewStringUTF((const char*) sqlite3_column_text(stmt, n));
+    jsize len = sqlite3_column_bytes(stmt, n);
+    jbyteArray result = env->NewByteArray(len);
+    env->SetByteArrayRegion(result, 0, len, (jbyte *) sqlite3_column_blob(stmt, n));
+    return result;
 }
 
 JNIEXPORT jstring JNICALL
