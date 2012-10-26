@@ -37,6 +37,9 @@ case class SqlDouble(d: Double) extends SqlValue {
   override def toInt = if (d.round == d) d.toInt else super.toInt
   override def toLong = if (d.round == d) d.toLong else super.toLong
 }
+case class SqlBlob(bytes: Array[Byte]) extends SqlValue {
+    override def toString = new String(bytes)
+}
 case class SqlText(s: String) extends SqlValue { override def toString = s }
 
 class SqliteResultIterator(db: SqliteDb, private var stmt: Long)
@@ -59,7 +62,8 @@ class SqliteResultIterator(db: SqliteDb, private var stmt: Long)
                           else
                             SqlLong(j)
                         case Sqlite3C.FLOAT => SqlDouble(Sqlite3C.column_double(stmt, i))
-                        case Sqlite3C.TEXT => SqlText(Sqlite3C.column_text(stmt, i))
+                        case Sqlite3C.TEXT => SqlBlob(Sqlite3C.column_blob(stmt, i))
+                        case Sqlite3C.BLOB => SqlBlob(Sqlite3C.column_blob(stmt, i))
                         case Sqlite3C.NULL => SqlNull()
                         case _ => sys.error("unsupported type")
                     }
