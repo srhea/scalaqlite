@@ -17,50 +17,61 @@ class SqliteDbSpec extends FlatSpec with ShouldMatchers {
     "INSERT" should "add rows to the table" in {
         db.execute("INSERT INTO foo (i, f, t) VALUES (1, 2.0, 'foo');")
         db.execute("INSERT INTO foo (i, f, t) VALUES (3, NULL, 'bar');")
-        db.query("SELECT count(*) FROM foo;").toSeq.head.head should equal (SqlInt(2))
+        db.foreachRow("SELECT count(*) FROM foo;") { row => row(0) should equal (SqlInt(2)) }
+    }
+
+    "a prepared statement INSERT" should "add rows to the table" in {
+        db.prepare("INSERT INTO foo (i, f, t) VALUES (?, ?, ?);") { stmt =>
+            stmt.execute(SqlInt(5), SqlDouble(10.0), SqlText("foobar"))
+            stmt.execute(SqlInt(5), SqlDouble(11.0), SqlText("notfoobar"))
+        }
+        db.foreachRow("SELECT count(*) FROM foo WHERE i > 4") { row => row(0) should equal (SqlInt(2)) }
     }
 
     "SELECT *" should "output all the rows" in {
         var list: List[String] = Nil
-        for (row <- db.query("SELECT * FROM foo;"))
+        db.foreachRow("SELECT * FROM foo;") { row =>
             list = row.map(_.toString).mkString(" ") :: list
-        list.reverse.mkString("\n") should equal ("1 2.0 foo\n3 NULL bar")
+        }
+        list.reverse.mkString("\n") should equal ("1 2.0 foo\n3 NULL bar\n5 10.0 foobar\n5 11.0 notfoobar")
     }
 
     "SqliteResultSet.map" should "work" in {
-        val s = db.query("SELECT * FROM foo;").map(_.mkString(" ")).mkString("\n")
-        s should equal ("1 2.0 foo\n3 NULL bar")
+        val s = db.query("SELECT * FROM foo;") { _.map(_.mkString(" ")).mkString("\n") }
+        s should equal ("1 2.0 foo\n3 NULL bar\n5 10.0 foobar\n5 11.0 notfoobar")
     }
 
     "SqliteResultSet.filter" should "work" in {
-        for (row <- db.query("SELECT * FROM foo;") if row(2).toString == "bar")
+        db.foreachRow("SELECT * FROM foo") { row => if (row(2).toString == "bar")
           row.mkString(" ") should equal ("3 NULL bar")
+        }
     }
 
     "doubles" should "have full precision" in {
-        val d = db.query("SELECT 1234567890123.0;").map(_.map(_.toDouble)).toSeq.head.head
-        d should equal (1234567890123.0)
+        db.foreachRow("SELECT 1234567890123.0;") { row => row(0).toDouble should equal (1234567890123.0) }
     }
 
     "longs" should "have full precision" in {
         val low = Integer.MIN_VALUE - 1L
         val high = Integer.MAX_VALUE + 1L
-        val i = db.query("SELECT " + low + ";").toSeq.head.head
-        i.isInstanceOf[SqlLong] should equal (true)
-        i.toLong should equal (low)
-        val j = db.query("SELECT " + high + ";").toSeq.head.head
-        j.isInstanceOf[SqlLong] should equal (true)
-        j.toLong should equal (high)
+        db.foreachRow("SELECT " + low + ";") { row =>
+          row(0).isInstanceOf[SqlLong] should equal (true)
+          row(0).toLong should equal (low)
+        }
+        db.foreachRow("SELECT " + high + ";") { row =>
+          row(0).isInstanceOf[SqlLong] should equal (true)
+          row(0).toLong should equal (high)
+        }
     }
 
     "values that fit in an int" should "be returned as an int" in {
-      db.query("SELECT " + Integer.MIN_VALUE + ";").toSeq.head.head.isInstanceOf[SqlInt] should equal (true)
-      db.query("SELECT " + Integer.MAX_VALUE + ";").toSeq.head.head.isInstanceOf[SqlInt] should equal (true)
+      db.foreachRow("SELECT " + Integer.MIN_VALUE + ";") { row => row(0).isInstanceOf[SqlInt] should equal (true) }
+      db.foreachRow("SELECT " + Integer.MAX_VALUE + ";") { row => row(0).isInstanceOf[SqlInt] should equal (true) }
     }
 
     "values that don't fit in an int" should "throw an exception on toInt" in {
       intercept[SqlException] {
-        db.query("SELECT " + (Integer.MAX_VALUE + 1L) + ";").toSeq.head.head.toInt
+        db.foreachRow("SELECT " + (Integer.MAX_VALUE + 1L) + ";") { row => row(0).toInt }
       }
     }
 }

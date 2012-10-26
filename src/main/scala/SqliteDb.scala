@@ -13,16 +13,19 @@ abstract class SqlValue {
   def toInt: Int = throw new SqlException(toString + " is not an int")
   def toLong: Long = throw new SqlException(toString + " is not an long")
   def isNull = false
+  def bindValue(stmt: Long, col: Int): Int
 }
 case class SqlNull() extends SqlValue {
   override def toString = "NULL"
   override def isNull = true
+  override def bindValue(stmt: Long, col: Int) = Sqlite3C.bind_null(stmt, col)
 }
 case class SqlInt(i: Int) extends SqlValue {
   override def toString = i.toString
   override def toDouble = i
   override def toInt = i
   override def toLong = i
+  override def bindValue(stmt: Long, col: Int) = Sqlite3C.bind_int64(stmt, col, i.toLong)
 }
 case class SqlLong(i: Long) extends SqlValue {
   override def toString = i.toString
@@ -30,19 +33,34 @@ case class SqlLong(i: Long) extends SqlValue {
   override def toInt =
     if (i <= Integer.MAX_VALUE && i >= Integer.MIN_VALUE) i.toInt else super.toInt
   override def toLong = i
+  override def bindValue(stmt: Long, col: Int) = Sqlite3C.bind_int64(stmt, col, i)
 }
 case class SqlDouble(d: Double) extends SqlValue {
   override def toString = d.toString
   override def toDouble = d
   override def toInt = if (d.round == d) d.toInt else super.toInt
   override def toLong = if (d.round == d) d.toLong else super.toLong
+  override def bindValue(stmt: Long, col: Int) = Sqlite3C.bind_double(stmt, col, d)
 }
 case class SqlBlob(bytes: Array[Byte]) extends SqlValue {
     override def toString = new String(bytes)
+    override def bindValue(stmt: Long, col: Int) = Sqlite3C.bind_blob(stmt, col, bytes)
 }
-case class SqlText(s: String) extends SqlValue { override def toString = s }
+case class SqlText(s: String) extends SqlValue {
+    override def toString = s
+    override def bindValue(stmt: Long, col: Int) = Sqlite3C.bind_text(stmt, col, s)
+}
 
-class SqliteResultIterator(db: SqliteDb, private var stmt: Long)
+class SqliteStatement(db: SqliteDb, private val stmt: Array[Long]) {
+    def query(params: SqlValue*): Iterator[IndexedSeq[SqlValue]] = {
+        params.foldLeft(1) { (i, param) => param.bindValue(stmt(0), i); i + 1 }
+        new SqliteResultIterator(db, stmt(0))
+    }
+    def execute(params: SqlValue*) { for (row <- query(params:_*))() }
+    def close = if (stmt(0) != 0) stmt(0) = Sqlite3C.finalize(stmt(0))
+}
+
+class SqliteResultIterator(db: SqliteDb, private val stmt: Long)
     extends Iterator[IndexedSeq[SqlValue]]
 {
     private var cachedRow: IndexedSeq[SqlValue] = null
@@ -69,7 +87,7 @@ class SqliteResultIterator(db: SqliteDb, private var stmt: Long)
                     }
                 }
             case Sqlite3C.DONE =>
-                Sqlite3C.finalize(stmt)
+                Sqlite3C.reset(stmt)
                 null
             case Sqlite3C.ERROR =>
                 sys.error("sqlite error: " + db.errmsg)
@@ -86,11 +104,6 @@ class SqliteResultIterator(db: SqliteDb, private var stmt: Long)
         advance()
         result
     }
-
-    override def finalize() {
-        if (hasNext)
-            Sqlite3C.finalize(stmt)
-    }
 }
 
 class SqliteDb(path: String) {
@@ -102,13 +115,20 @@ class SqliteDb(path: String) {
         db(0) = 0
     }
     override def finalize() { if (db(0) != 0) Sqlite3C.close(db(0)) }
-    def query(sql: String): Iterator[IndexedSeq[SqlValue]] = {
+    def prepare[R](sql: String)(f: SqliteStatement => R): R = {
         assert(db(0) != 0, "db is closed")
-        val stmt = Array(0L)
-        Sqlite3C.prepare_v2(db(0), sql, stmt) ensuring (_ == Sqlite3C.OK, errmsg)
-        new SqliteResultIterator(this, stmt(0))
+        val stmtPointer = Array(0L)
+        Sqlite3C.prepare_v2(db(0), sql, stmtPointer) ensuring (_ == Sqlite3C.OK, errmsg)
+        val stmt = new SqliteStatement(this, stmtPointer)
+        try f(stmt) finally stmt.close
     }
-    def execute(sql: String) { for (row <- query(sql)) () }
+    def query[R](sql: String)(f: Iterator[IndexedSeq[SqlValue]] => R): R = {
+      prepare(sql) { stmt => f(stmt.query()) }
+    }
+    def foreachRow(sql: String)(f: IndexedSeq[SqlValue] => Unit) {
+      prepare(sql) { stmt => stmt.query().foreach { row => f(row) } }
+    }
+    def execute(sql: String) { prepare(sql) { stmt => stmt.execute() } }
     def enableLoadExtension(on: Boolean) {
         Sqlite3C.enable_load_extension(db(0), if (on) 1 else 0)
     }

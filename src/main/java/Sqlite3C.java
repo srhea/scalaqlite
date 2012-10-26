@@ -30,6 +30,12 @@ public class Sqlite3C {
     native static public int close(long db);
     native static public int enable_load_extension(long db, int onoff);
     native static public int prepare_v2(long db, String sql, long[] stmt);
+    native static public int reset(long stmt);
+    native static public int bind_null(long stmt, int index);
+    native static public int bind_int64(long stmt, int index, long value);
+    native static public int bind_double(long stmt, int index, double value);
+    native static public int bind_text(long stmt, int index, String value);
+    native static public int bind_blob(long stmt, int index, byte[] value);
     native static public int step(long stmt);
     native static public int finalize(long stmt);
     native static public int column_count(long stmt);
