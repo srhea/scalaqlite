@@ -59,6 +59,56 @@ Java_org_srhea_scalaqlite_Sqlite3C_prepare_1v2(
     return r;
 }
 
+JNIEXPORT jint JNICALL Java_org_srhea_scalaqlite_Sqlite3C_reset
+  (JNIEnv *env, jclass cls, jlong jstmt)
+{
+   sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
+   return sqlite3_reset(stmt);
+}
+
+JNIEXPORT jint JNICALL Java_org_srhea_scalaqlite_Sqlite3C_bind_1null
+  (JNIEnv *env, jclass cls, jlong jstmt, jint jindex)
+{
+    sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
+    return sqlite3_bind_null(stmt, jindex);
+}
+
+JNIEXPORT jint JNICALL Java_org_srhea_scalaqlite_Sqlite3C_bind_1int64
+  (JNIEnv *env, jclass cls, jlong jstmt, jint jindex, jlong jvalue)
+{
+    sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
+    return sqlite3_bind_int64(stmt, jindex, (sqlite3_int64) jvalue);
+}
+
+JNIEXPORT jint JNICALL Java_org_srhea_scalaqlite_Sqlite3C_bind_1double
+  (JNIEnv *env, jclass cls, jlong jstmt, jint jindex, jdouble jvalue)
+{
+    sqlite3_stmt *stmt = (sqlite3_stmt*) jstmt;
+    return sqlite3_bind_double(stmt, jindex, jvalue);
+}
+
+JNIEXPORT jint JNICALL Java_org_srhea_scalaqlite_Sqlite3C_bind_1text
+  (JNIEnv *env, jclass cls, jlong jstmt, jint jindex, jstring jvalue)
+{
+    jboolean iscopy;
+    jint len = env->GetStringLength(jvalue);
+    const char *cvalue = env->GetStringUTFChars(jvalue, &iscopy);
+    int r = sqlite3_bind_text((sqlite3_stmt*) jstmt, jindex, cvalue, len, SQLITE_TRANSIENT);
+    env->ReleaseStringUTFChars(jvalue, cvalue);
+    return r;
+}
+
+JNIEXPORT jint JNICALL Java_org_srhea_scalaqlite_Sqlite3C_bind_1blob
+  (JNIEnv *env, jclass cls, jlong jstmt, jint jindex, jbyteArray jvalue)
+{
+    jint len = env->GetArrayLength(jvalue);
+    jboolean iscopy;
+    const char *cvalue = (const char *) env->GetByteArrayElements(jvalue, &iscopy);
+    int r = sqlite3_bind_blob((sqlite3_stmt*) jstmt, jindex, cvalue, len, SQLITE_TRANSIENT);
+    env->ReleaseByteArrayElements(jvalue, 0, len);
+    return r;
+}
+
 JNIEXPORT jint JNICALL
 Java_org_srhea_scalaqlite_Sqlite3C_step(JNIEnv *env, jclass cls, jlong jstmt)
 {
