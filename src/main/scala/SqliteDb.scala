@@ -56,6 +56,9 @@ class SqliteStatement(db: SqliteDb, private val stmt: Array[Long]) {
         params.foldLeft(1) { (i, param) => param.bindValue(stmt(0), i); i + 1 }
         try f(new SqliteResultIterator(db, stmt(0))) finally Sqlite3C.reset(stmt(0))
     }
+    def foreachRow(params: SqlValue*)(f: IndexedSeq[SqlValue] => Unit) {
+      query(params:_*) { i => i.foreach { row => f(row) } }
+    }
     def execute(params: SqlValue*) { query(params:_*) { i => i.foreach { row => Unit } } }
     def close = if (stmt(0) != 0) stmt(0) = Sqlite3C.finalize(stmt(0))
 }
@@ -125,7 +128,7 @@ class SqliteDb(path: String) {
       prepare(sql) { stmt => stmt.query()(f) }
     }
     def foreachRow(sql: String)(f: IndexedSeq[SqlValue] => Unit) {
-      prepare(sql) { stmt => stmt.query() { i => i.foreach { row => f(row) } } }
+      prepare(sql) { stmt => stmt.foreachRow()(f) }
     }
     def execute(sql: String) { prepare(sql) { stmt => stmt.execute() } }
     def enableLoadExtension(on: Boolean) {
