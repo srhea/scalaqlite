@@ -74,4 +74,20 @@ class SqliteDbSpec extends FlatSpec with ShouldMatchers {
         db.foreachRow("SELECT " + (Integer.MAX_VALUE + 1L) + ";") { row => row(0).toInt }
       }
     }
+
+    "Prepared statements" should "properly reset themselves" in {
+      db.execute("CREATE TABLE bar (i INTEGER, d DOUBLE);")
+      db.execute("INSERT INTO bar (i, d) VALUES (1, 2.0);")
+      db.execute("INSERT INTO bar (i, d) VALUES (1, 3.0);")
+      db.execute("INSERT INTO bar (i, d) VALUES (1, 4.0);")
+      db.execute("INSERT INTO bar (i, d) VALUES (2, 5.0);")
+      db.prepare("SELECT * FROM bar WHERE i = ?;") { stmt =>
+        val i = stmt.query(SqlInt(1))
+        i.hasNext should equal(true)
+        i.next()(1).toDouble should equal (2.0)
+        val i2 = stmt.query(SqlInt(2))
+        i2.hasNext should equal(true)
+        i2.next()(1).toDouble should equal (5.0)
+      }
+    }
 }
