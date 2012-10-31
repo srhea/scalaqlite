@@ -82,12 +82,10 @@ class SqliteDbSpec extends FlatSpec with ShouldMatchers {
       db.execute("INSERT INTO bar (i, d) VALUES (1, 4.0);")
       db.execute("INSERT INTO bar (i, d) VALUES (2, 5.0);")
       db.prepare("SELECT * FROM bar WHERE i = ?;") { stmt =>
-        val i = stmt.query(SqlInt(1))
-        i.hasNext should equal(true)
-        i.next()(1).toDouble should equal (2.0)
-        val i2 = stmt.query(SqlInt(2))
-        i2.hasNext should equal(true)
-        i2.next()(1).toDouble should equal (5.0)
+        stmt.query(SqlInt(1)) { i => i.hasNext should equal(true)
+          i.next()(1).toDouble should equal (2.0) }
+        stmt.query(SqlInt(2)) { i => i.hasNext should equal(true)
+          i.next()(1).toDouble should equal (5.0) }
       }
     }
 }
