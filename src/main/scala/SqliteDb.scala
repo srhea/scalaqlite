@@ -52,11 +52,11 @@ case class SqlText(s: String) extends SqlValue {
 }
 
 class SqliteStatement(db: SqliteDb, private val stmt: Array[Long]) {
-    def query(params: SqlValue*): Iterator[IndexedSeq[SqlValue]] = {
+    def query[R](params: SqlValue*)(f: Iterator[IndexedSeq[SqlValue]] => R): R = {
         params.foldLeft(1) { (i, param) => param.bindValue(stmt(0), i); i + 1 }
-        new SqliteResultIterator(db, stmt(0))
+        try f(new SqliteResultIterator(db, stmt(0))) finally Sqlite3C.reset(stmt(0))
     }
-    def execute(params: SqlValue*) { for (row <- query(params:_*))() }
+    def execute(params: SqlValue*) { query(params:_*) { i => i.foreach { row => Unit } } }
     def close = if (stmt(0) != 0) stmt(0) = Sqlite3C.finalize(stmt(0))
 }
 
@@ -87,7 +87,6 @@ class SqliteResultIterator(db: SqliteDb, private val stmt: Long)
                     }
                 }
             case Sqlite3C.DONE =>
-                Sqlite3C.reset(stmt)
                 null
             case Sqlite3C.ERROR =>
                 sys.error("sqlite error: " + db.errmsg)
@@ -123,10 +122,10 @@ class SqliteDb(path: String) {
         try f(stmt) finally stmt.close
     }
     def query[R](sql: String)(f: Iterator[IndexedSeq[SqlValue]] => R): R = {
-      prepare(sql) { stmt => f(stmt.query()) }
+      prepare(sql) { stmt => stmt.query()(f) }
     }
     def foreachRow(sql: String)(f: IndexedSeq[SqlValue] => Unit) {
-      prepare(sql) { stmt => stmt.query().foreach { row => f(row) } }
+      prepare(sql) { stmt => stmt.query() { i => i.foreach { row => f(row) } } }
     }
     def execute(sql: String) { prepare(sql) { stmt => stmt.execute() } }
     def enableLoadExtension(on: Boolean) {
