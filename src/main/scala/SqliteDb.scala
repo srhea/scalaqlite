@@ -12,6 +12,7 @@ abstract class SqlValue {
   def toDouble: Double = throw new SqlException(toString + " is not a double")
   def toInt: Int = throw new SqlException(toString + " is not an int")
   def toLong: Long = throw new SqlException(toString + " is not an long")
+  def toBlob: Array[Byte] = throw new SqlException(toString + "is not a blob")
   def isNull = false
   def bindValue(stmt: Long, col: Int): Int
 }
@@ -43,6 +44,7 @@ case class SqlDouble(d: Double) extends SqlValue {
   override def bindValue(stmt: Long, col: Int) = Sqlite3C.bind_double(stmt, col, d)
 }
 case class SqlBlob(bytes: Array[Byte]) extends SqlValue {
+    override def toBlob = bytes
     override def toString = new String(bytes)
     override def bindValue(stmt: Long, col: Int) = Sqlite3C.bind_blob(stmt, col, bytes)
 }
