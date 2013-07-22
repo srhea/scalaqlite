@@ -12,7 +12,7 @@ abstract class SqlValue {
   def toDouble: Double = throw new SqlException(toString + " is not a double")
   def toInt: Int = throw new SqlException(toString + " is not an int")
   def toLong: Long = throw new SqlException(toString + " is not an long")
-  def toBlob: Seq[Byte] = throw new SqlException(toString + "is not a blob")
+  def toBlob: Seq[Byte] = throw new SqlException(toString + " is not a blob")
   def isNull = false
   def bindValue(stmt: Long, col: Int): Int
 }
