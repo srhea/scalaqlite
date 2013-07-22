@@ -88,4 +88,15 @@ class SqliteDbSpec extends FlatSpec with ShouldMatchers {
           i.next()(1).toDouble should equal (5.0) }
       }
     }
+
+    "Text strings bound as blobs" should "be interpreted as text" in {
+      db.execute("CREATE TEMP TABLE blob_test (t TEXT)")
+      db.prepare("INSERT INTO blob_test (t) VALUES (?1)") { stmt =>
+        stmt.execute(SqlBlob("bar".map(_.toByte)))
+      }
+      val res = db.query("SELECT COUNT(*) FROM blob_test WHERE t = 'bar'") {
+        it => if (it.hasNext) it.next.head.toLong else -1
+      }
+      res should equal (1)
+    }
 }
