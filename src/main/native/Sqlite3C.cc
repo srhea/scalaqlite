@@ -104,7 +104,7 @@ JNIEXPORT jint JNICALL Java_org_srhea_scalaqlite_Sqlite3C_bind_1blob
     jint len = env->GetArrayLength(jvalue);
     jboolean iscopy;
     jbyte *cvalue = (jbyte *) env->GetByteArrayElements(jvalue, &iscopy);
-    int r = sqlite3_bind_blob((sqlite3_stmt*) jstmt, jindex, cvalue, len, SQLITE_TRANSIENT);
+    int r = sqlite3_bind_text((sqlite3_stmt*) jstmt, jindex, (const char *) cvalue, len, SQLITE_TRANSIENT);
     env->ReleaseByteArrayElements(jvalue, cvalue, 0);
     return r;
 }
