@@ -122,7 +122,8 @@ class SqliteDb(path: String) {
     def prepare[R](sql: String)(f: SqliteStatement => R): R = {
         assert(db(0) != 0, "db is closed")
         val stmtPointer = Array(0L)
-        Sqlite3C.prepare_v2(db(0), sql, stmtPointer) ensuring (_ == Sqlite3C.OK, errmsg)
+        if (Sqlite3C.prepare_v2(db(0), sql, stmtPointer) != Sqlite3C.OK)
+          throw new Exception(errmsg)
         val stmt = new SqliteStatement(this, stmtPointer)
         try f(stmt) finally stmt.close
     }
