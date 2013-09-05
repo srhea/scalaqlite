@@ -85,7 +85,7 @@ class SqliteResultIterator(db: SqliteDb, private val stmt: Long)
                           else
                             SqlLong(j)
                         case Sqlite3C.FLOAT => SqlDouble(Sqlite3C.column_double(stmt, i))
-                        case Sqlite3C.TEXT => SqlBlob(Sqlite3C.column_blob(stmt, i))
+                        case Sqlite3C.TEXT => SqlText(new String(Sqlite3C.column_blob(stmt, i)))
                         case Sqlite3C.BLOB => SqlBlob(Sqlite3C.column_blob(stmt, i))
                         case Sqlite3C.NULL => SqlNull()
                         case _ => sys.error("unsupported type")
