@@ -4,7 +4,6 @@
 // See the file LICENSE included in this distribution for details.
 
 package org.srhea.scalaqlite
-import scala.collection.mutable.ListBuffer
 
 class SqlException(msg: String) extends Exception(msg)
 
@@ -62,6 +61,8 @@ class SqliteStatement(db: SqliteDb, private val stmt: Array[Long]) {
       query(params:_*) { i => i.foreach { row => f(row) } }
     }
     def execute(params: SqlValue*) { query(params:_*) { i => i.foreach { row => Unit } } }
+    def mapRows[R](params: SqlValue*)(f: IndexedSeq[SqlValue] => R) = query(params:_*)(_.map(f).toSeq)
+    def getRows(params: SqlValue*) = query(params:_*)(_.toSeq)
     def close = if (stmt(0) != 0) stmt(0) = Sqlite3C.finalize(stmt(0))
 }
 
@@ -131,6 +132,9 @@ class SqliteDb(path: String) {
       prepare(sql)(_.query(params:_*)(f))
     def foreachRow(sql: String, params: SqlValue*)(f: IndexedSeq[SqlValue] => Unit) =
       prepare(sql)( _.foreachRow(params:_*)(f))
+    def mapRows[R](sql: String, params: SqlValue*)(f: IndexedSeq[SqlValue] => R) =
+      prepare(sql)(_.mapRows(params:_*)(f))
+    def getRows(sql: String, params: SqlValue*) = prepare(sql)(_.getRows(params:_*))
     def execute(sql: String, params: SqlValue*) { prepare(sql)(_.execute(params:_*)) }
     def enableLoadExtension(on: Boolean) {
         Sqlite3C.enable_load_extension(db(0), if (on) 1 else 0)
