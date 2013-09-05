@@ -127,13 +127,11 @@ class SqliteDb(path: String) {
         val stmt = new SqliteStatement(this, stmtPointer)
         try f(stmt) finally stmt.close
     }
-    def query[R](sql: String)(f: Iterator[IndexedSeq[SqlValue]] => R): R = {
-      prepare(sql) { stmt => stmt.query()(f) }
-    }
-    def foreachRow(sql: String)(f: IndexedSeq[SqlValue] => Unit) {
-      prepare(sql) { stmt => stmt.foreachRow()(f) }
-    }
-    def execute(sql: String) { prepare(sql) { stmt => stmt.execute() } }
+    def query[R](sql: String, params: SqlValue*)(f: Iterator[IndexedSeq[SqlValue]] => R): R =
+      prepare(sql)(_.query(params:_*)(f))
+    def foreachRow(sql: String, params: SqlValue*)(f: IndexedSeq[SqlValue] => Unit) =
+      prepare(sql)( _.foreachRow(params:_*)(f))
+    def execute(sql: String, params: SqlValue*) { prepare(sql)(_.execute(params:_*)) }
     def enableLoadExtension(on: Boolean) {
         Sqlite3C.enable_load_extension(db(0), if (on) 1 else 0)
     }
