@@ -89,14 +89,26 @@ class SqliteDbSpec extends FlatSpec with ShouldMatchers {
       }
     }
 
-    "Text strings bound as blobs" should "be interpreted as text" in {
-      db.execute("CREATE TEMP TABLE blob_test (t TEXT)")
-      db.prepare("INSERT INTO blob_test (t) VALUES (?1)") { stmt =>
-        stmt.execute(SqlBlob("bar".map(_.toByte)))
-      }
-      val res = db.query("SELECT COUNT(*) FROM blob_test WHERE t = 'bar'") {
-        it => if (it.hasNext) it.next.head.toLong else -1
-      }
-      res should equal (1)
+    "Bind columns " should " have correct type affinity" in {
+      val barBlob = SqlBlob("bar".map(_.toByte))
+      val barText = SqlText("bar")
+      val barBlobString = "X'" + "bar".map(c => "%02X".format(c.toByte)).mkString("") + "'"
+      db.getRows("SELECT 1 AS x WHERE ?1 = ?2", barBlob, barText).length should equal (0)
+      db.getRows("SELECT 1 AS x WHERE ?1 = " + barBlobString, barBlob).length should equal (1)
+      db.getRows("SELECT 1 AS x WHERE ?1 = 'bar'", barBlob).length should equal (0)
+      db.getRows("SELECT 1 AS x WHERE ?1 = 'bar'", barText).length should equal (1)
+
+      db.execute("CREATE TEMP TABLE blob_test (b BLOB, t TEXT)")
+      db.execute("INSERT INTO blob_test (b, t) VALUES (?1, ?2)", barBlob, barText)
+
+      db.getRows("SELECT COUNT(*) FROM blob_test")(0)(0).toLong should equal(1)
+      db.getRows("SELECT COUNT(*) FROM blob_test WHERE b = " + barBlobString)(0)(0).toLong should equal(1)
+      db.getRows("SELECT COUNT(*) FROM blob_test WHERE b = 'bar'")(0)(0).toLong should equal(0)
+      db.getRows("SELECT COUNT(*) FROM blob_test WHERE t = " + barBlobString)(0)(0).toLong should equal(0)
+      db.getRows("SELECT COUNT(*) FROM blob_test WHERE t = 'bar'")(0)(0).toLong should equal(1)
+
+      val types = db.mapRows("SELECT TYPEOF(b), TYPEOF(t) FROM blob_test")(_.map(_.toString).mkString(", "))
+      types.mkString should equal ("blob, text")
+      db.execute("DROP TABLE blob_test")
     }
 }
