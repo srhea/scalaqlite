@@ -140,4 +140,5 @@ class SqliteDb(path: String) {
         Sqlite3C.enable_load_extension(db(0), if (on) 1 else 0)
     }
     def errmsg: String = if (db(0) == 0) "db not open" else Sqlite3C.errmsg(db(0))
+    def changeCount: Int = Sqlite3C.sqlite3_changes(db(0))
 }

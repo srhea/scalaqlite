@@ -167,3 +167,9 @@ Java_org_srhea_scalaqlite_Sqlite3C_errmsg(JNIEnv *env, jclass cls, jlong jdb)
     sqlite3 *db = (sqlite3*) jdb;
     return env->NewStringUTF(sqlite3_errmsg(db));
 }
+
+JNIEXPORT jint JNICALL
+Java_org_srhea_scalaqlite_Sqlite3C_sqlite3_1changes(JNIEnv *, jclass, jlong jdb)
+{
+    return sqlite3_changes((sqlite3*) jdb);
+}
