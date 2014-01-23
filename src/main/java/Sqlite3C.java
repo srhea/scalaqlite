@@ -44,6 +44,7 @@ public class Sqlite3C {
     native static public double column_double(long stmt, int n);
     native static public byte[] column_blob(long stmt, int n);
     native static public String errmsg(long db);
+    native static public int sqlite3_changes(long db);
 
     static {
         System.loadLibrary("scalaqlite");
