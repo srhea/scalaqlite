@@ -20,13 +20,6 @@ case class SqlNull() extends SqlValue {
   override def isNull = true
   override def bindValue(stmt: Long, col: Int) = Sqlite3C.bind_null(stmt, col)
 }
-case class SqlInt(i: Int) extends SqlValue {
-  override def toString = i.toString
-  override def toDouble = i
-  override def toInt = i
-  override def toLong = i
-  override def bindValue(stmt: Long, col: Int) = Sqlite3C.bind_int64(stmt, col, i.toLong)
-}
 case class SqlLong(i: Long) extends SqlValue {
   override def toString = i.toString
   override def toDouble = i
@@ -79,12 +72,7 @@ class SqliteResultIterator(db: SqliteDb, private val stmt: Long)
             case Sqlite3C.ROW =>
                 (0 until Sqlite3C.column_count(stmt)).map { i =>
                     Sqlite3C.column_type(stmt, i) match {
-                        case Sqlite3C.INTEGER =>
-                          val j = Sqlite3C.column_int64(stmt, i)
-                          if (j <= Integer.MAX_VALUE && j >= Integer.MIN_VALUE)
-                            SqlInt(j.toInt)
-                          else
-                            SqlLong(j)
+                        case Sqlite3C.INTEGER => SqlLong(Sqlite3C.column_int64(stmt, i))
                         case Sqlite3C.FLOAT => SqlDouble(Sqlite3C.column_double(stmt, i))
                         case Sqlite3C.TEXT => SqlText(new String(Sqlite3C.column_blob(stmt, i)))
                         case Sqlite3C.BLOB => SqlBlob(Sqlite3C.column_blob(stmt, i))
