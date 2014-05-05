@@ -111,4 +111,22 @@ class SqliteDbSpec extends FlatSpec with ShouldMatchers {
       types.mkString should equal ("blob, text")
       db.execute("DROP TABLE blob_test")
     }
+
+    "Sql nulls" should "work" in {
+      db.getRows("SELECT NULL").head.head should equal (SqlNull)
+    }
+
+    "Pattern matching" should "work for longs and nulls" in {
+      db.foreachRow("SELECT 1, NULL") { case Seq(SqlLong(i), SqlNull) => i should equal (1) }
+    }
+
+    "Inserting nulls" should "work" in {
+      db.execute("CREATE TABLE null_test (x, y)")
+      db.execute("INSERT INTO null_test (x, y) VALUES (?, ?)", SqlLong(1), SqlNull)
+      db.execute("INSERT INTO null_test (x, y) VALUES (?, ?)", SqlLong(2))
+      db.execute("INSERT INTO null_test (x, y) VALUES (?, ?)", SqlNull, SqlLong(3))
+      db.getRows("SELECT * FROM null_test WHERE x = 1").head should equal (Seq(SqlLong(1), SqlNull))
+      db.getRows("SELECT * FROM null_test WHERE x = 2").head should equal (Seq(SqlLong(2), SqlNull))
+      db.getRows("SELECT * FROM null_test WHERE y IS NOT NULL").head should equal (Seq(SqlNull, SqlLong(3)))
+    }
 }
