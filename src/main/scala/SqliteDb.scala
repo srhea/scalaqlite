@@ -15,7 +15,7 @@ abstract class SqlValue {
   def isNull = false
   def bindValue(stmt: Long, col: Int): Int
 }
-case class SqlNull() extends SqlValue {
+case class SqlNull extends SqlValue {
   override def toString = "NULL"
   override def isNull = true
   override def bindValue(stmt: Long, col: Int) = Sqlite3C.bind_null(stmt, col)
