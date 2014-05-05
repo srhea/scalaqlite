@@ -15,7 +15,7 @@ abstract class SqlValue {
   def isNull = false
   def bindValue(stmt: Long, col: Int): Int
 }
-case class SqlNull extends SqlValue {
+case object SqlNull extends SqlValue {
   override def toString = "NULL"
   override def isNull = true
   override def bindValue(stmt: Long, col: Int) = Sqlite3C.bind_null(stmt, col)
@@ -76,7 +76,7 @@ class SqliteResultIterator(db: SqliteDb, private val stmt: Long)
                         case Sqlite3C.FLOAT => SqlDouble(Sqlite3C.column_double(stmt, i))
                         case Sqlite3C.TEXT => SqlText(new String(Sqlite3C.column_blob(stmt, i)))
                         case Sqlite3C.BLOB => SqlBlob(Sqlite3C.column_blob(stmt, i))
-                        case Sqlite3C.NULL => SqlNull()
+                        case Sqlite3C.NULL => SqlNull
                         case _ => sys.error("unsupported type")
                     }
                 }
