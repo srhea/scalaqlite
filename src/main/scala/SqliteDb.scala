@@ -70,16 +70,21 @@ class SqliteResultIterator(db: SqliteDb, private val stmt: Long)
     private def advance() {
         cachedRow = Sqlite3C.step(stmt) match {
             case Sqlite3C.ROW =>
-                (0 until Sqlite3C.column_count(stmt)).map { i =>
-                    Sqlite3C.column_type(stmt, i) match {
+                val colCount = Sqlite3C.column_count(stmt)
+                var i = 0
+                val res = new scala.collection.mutable.ArrayBuffer[SqlValue]
+                while (i < colCount) {
+                    res += (Sqlite3C.column_type(stmt, i) match {
                         case Sqlite3C.INTEGER => SqlLong(Sqlite3C.column_int64(stmt, i))
                         case Sqlite3C.FLOAT => SqlDouble(Sqlite3C.column_double(stmt, i))
                         case Sqlite3C.TEXT => SqlText(new String(Sqlite3C.column_blob(stmt, i)))
                         case Sqlite3C.BLOB => SqlBlob(Sqlite3C.column_blob(stmt, i))
                         case Sqlite3C.NULL => SqlNull
                         case _ => sys.error("unsupported type")
-                    }
+                    })
+                    i += 1
                 }
+                res
             case Sqlite3C.DONE =>
                 null
             case Sqlite3C.ERROR =>
