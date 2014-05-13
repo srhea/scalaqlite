@@ -42,7 +42,7 @@ case class SqlBlob(bytes: Seq[Byte]) extends SqlValue {
 }
 case class SqlText(s: String) extends SqlValue {
     override def toString = s
-    override def bindValue(stmt: Long, col: Int) = Sqlite3C.bind_text(stmt, col, s)
+    override def bindValue(stmt: Long, col: Int) = Sqlite3C.bind_text(stmt, col, s.getBytes)
 }
 
 class SqliteStatement(db: SqliteDb, private val stmt: Array[Long]) {
