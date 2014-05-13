@@ -75,6 +75,16 @@ class SqliteDbSpec extends FlatSpec with ShouldMatchers {
       }
     }
 
+    "Non-ascii characters" should "be bound correctly" in {
+      val str = "百"
+      db.execute("CREATE TABLE non_ascii_test (str TEXT)")
+      db.execute("INSERT INTO non_ascii_test VALUES (?1)", SqlText(str))
+      db.foreachRow("SELECT str FROM non_ascii_test") { case Seq(SqlText(s)) =>
+        s should equal(str)
+        s.getBytes should equal(Array[Byte](-25, -103, -66))
+      }
+    }
+
     "Prepared statements" should "properly reset themselves" in {
       db.execute("CREATE TABLE bar (i INTEGER, d DOUBLE);")
       db.execute("INSERT INTO bar (i, d) VALUES (1, 2.0);")
