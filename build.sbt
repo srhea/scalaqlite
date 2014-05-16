@@ -4,6 +4,6 @@ organization := "org.srhea"
 
 version := "0.5-SNAPSHOT"
 
-scalaVersion := "2.10.1"
+scalaVersion := "2.9.1"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "1.9.1" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "1.7.2" % "test"
