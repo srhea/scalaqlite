@@ -15,17 +15,10 @@ abstract class SqlValue {
   def isNull = false
   def bindValue(stmt: Long, col: Int): Int
 }
-case class SqlNull() extends SqlValue {
+case object SqlNull extends SqlValue {
   override def toString = "NULL"
   override def isNull = true
   override def bindValue(stmt: Long, col: Int) = Sqlite3C.bind_null(stmt, col)
-}
-case class SqlInt(i: Int) extends SqlValue {
-  override def toString = i.toString
-  override def toDouble = i
-  override def toInt = i
-  override def toLong = i
-  override def bindValue(stmt: Long, col: Int) = Sqlite3C.bind_int64(stmt, col, i.toLong)
 }
 case class SqlLong(i: Long) extends SqlValue {
   override def toString = i.toString
@@ -49,7 +42,7 @@ case class SqlBlob(bytes: Seq[Byte]) extends SqlValue {
 }
 case class SqlText(s: String) extends SqlValue {
     override def toString = s
-    override def bindValue(stmt: Long, col: Int) = Sqlite3C.bind_text(stmt, col, s)
+    override def bindValue(stmt: Long, col: Int) = Sqlite3C.bind_text(stmt, col, s.getBytes)
 }
 
 class SqliteStatement(db: SqliteDb, private val stmt: Array[Long]) {
@@ -77,21 +70,21 @@ class SqliteResultIterator(db: SqliteDb, private val stmt: Long)
     private def advance() {
         cachedRow = Sqlite3C.step(stmt) match {
             case Sqlite3C.ROW =>
-                (0 until Sqlite3C.column_count(stmt)).map { i =>
-                    Sqlite3C.column_type(stmt, i) match {
-                        case Sqlite3C.INTEGER =>
-                          val j = Sqlite3C.column_int64(stmt, i)
-                          if (j <= Integer.MAX_VALUE && j >= Integer.MIN_VALUE)
-                            SqlInt(j.toInt)
-                          else
-                            SqlLong(j)
+                val colCount = Sqlite3C.column_count(stmt)
+                var i = 0
+                val res = new scala.collection.mutable.ArrayBuffer[SqlValue]
+                while (i < colCount) {
+                    res += (Sqlite3C.column_type(stmt, i) match {
+                        case Sqlite3C.INTEGER => SqlLong(Sqlite3C.column_int64(stmt, i))
                         case Sqlite3C.FLOAT => SqlDouble(Sqlite3C.column_double(stmt, i))
                         case Sqlite3C.TEXT => SqlText(new String(Sqlite3C.column_blob(stmt, i)))
                         case Sqlite3C.BLOB => SqlBlob(Sqlite3C.column_blob(stmt, i))
-                        case Sqlite3C.NULL => SqlNull()
+                        case Sqlite3C.NULL => SqlNull
                         case _ => sys.error("unsupported type")
-                    }
+                    })
+                    i += 1
                 }
+                res
             case Sqlite3C.DONE =>
                 null
             case Sqlite3C.ERROR =>

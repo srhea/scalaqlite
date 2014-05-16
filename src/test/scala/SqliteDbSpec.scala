@@ -17,15 +17,15 @@ class SqliteDbSpec extends FlatSpec with ShouldMatchers {
     "INSERT" should "add rows to the table" in {
         db.execute("INSERT INTO foo (i, f, t) VALUES (1, 2.0, 'foo');")
         db.execute("INSERT INTO foo (i, f, t) VALUES (3, NULL, 'bar');")
-        db.foreachRow("SELECT count(*) FROM foo;") { row => row(0) should equal (SqlInt(2)) }
+        db.foreachRow("SELECT count(*) FROM foo;") { row => row(0) should equal (SqlLong(2)) }
     }
 
     "a prepared statement INSERT" should "add rows to the table" in {
         db.prepare("INSERT INTO foo (i, f, t) VALUES (?, ?, ?);") { stmt =>
-            stmt.execute(SqlInt(5), SqlDouble(10.0), SqlText("foobar"))
-            stmt.execute(SqlInt(5), SqlDouble(11.0), SqlText("notfoobar"))
+            stmt.execute(SqlLong(5), SqlDouble(10.0), SqlText("foobar"))
+            stmt.execute(SqlLong(5), SqlDouble(11.0), SqlText("notfoobar"))
         }
-        db.foreachRow("SELECT count(*) FROM foo WHERE i > 4") { row => row(0) should equal (SqlInt(2)) }
+        db.foreachRow("SELECT count(*) FROM foo WHERE i > 4") { row => row(0) should equal (SqlLong(2)) }
     }
 
     "SELECT *" should "output all the rows" in {
@@ -65,8 +65,8 @@ class SqliteDbSpec extends FlatSpec with ShouldMatchers {
     }
 
     "values that fit in an int" should "be returned as an int" in {
-      db.foreachRow("SELECT " + Integer.MIN_VALUE + ";") { row => row(0).isInstanceOf[SqlInt] should equal (true) }
-      db.foreachRow("SELECT " + Integer.MAX_VALUE + ";") { row => row(0).isInstanceOf[SqlInt] should equal (true) }
+      db.foreachRow("SELECT " + Integer.MIN_VALUE + ";") { row => row(0).isInstanceOf[SqlLong] should equal (true) }
+      db.foreachRow("SELECT " + Integer.MAX_VALUE + ";") { row => row(0).isInstanceOf[SqlLong] should equal (true) }
     }
 
     "values that don't fit in an int" should "throw an exception on toInt" in {
@@ -82,9 +82,9 @@ class SqliteDbSpec extends FlatSpec with ShouldMatchers {
       db.execute("INSERT INTO bar (i, d) VALUES (1, 4.0);")
       db.execute("INSERT INTO bar (i, d) VALUES (2, 5.0);")
       db.prepare("SELECT * FROM bar WHERE i = ?;") { stmt =>
-        stmt.query(SqlInt(1)) { i => i.hasNext should equal(true)
+        stmt.query(SqlLong(1)) { i => i.hasNext should equal(true)
           i.next()(1).toDouble should equal (2.0) }
-        stmt.query(SqlInt(2)) { i => i.hasNext should equal(true)
+        stmt.query(SqlLong(2)) { i => i.hasNext should equal(true)
           i.next()(1).toDouble should equal (5.0) }
       }
     }
@@ -110,5 +110,23 @@ class SqliteDbSpec extends FlatSpec with ShouldMatchers {
       val types = db.mapRows("SELECT TYPEOF(b), TYPEOF(t) FROM blob_test")(_.map(_.toString).mkString(", "))
       types.mkString should equal ("blob, text")
       db.execute("DROP TABLE blob_test")
+    }
+
+    "Sql nulls" should "work" in {
+      db.getRows("SELECT NULL").head.head should equal (SqlNull)
+    }
+
+    "Pattern matching" should "work for longs and nulls" in {
+      db.foreachRow("SELECT 1, NULL") { case Seq(SqlLong(i), SqlNull) => i should equal (1) }
+    }
+
+    "Inserting nulls" should "work" in {
+      db.execute("CREATE TABLE null_test (x, y)")
+      db.execute("INSERT INTO null_test (x, y) VALUES (?, ?)", SqlLong(1), SqlNull)
+      db.execute("INSERT INTO null_test (x, y) VALUES (?, ?)", SqlLong(2))
+      db.execute("INSERT INTO null_test (x, y) VALUES (?, ?)", SqlNull, SqlLong(3))
+      db.getRows("SELECT * FROM null_test WHERE x = 1").head should equal (Seq(SqlLong(1), SqlNull))
+      db.getRows("SELECT * FROM null_test WHERE x = 2").head should equal (Seq(SqlLong(2), SqlNull))
+      db.getRows("SELECT * FROM null_test WHERE y IS NOT NULL").head should equal (Seq(SqlNull, SqlLong(3)))
     }
 }

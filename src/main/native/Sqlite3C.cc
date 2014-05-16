@@ -88,13 +88,13 @@ JNIEXPORT jint JNICALL Java_org_srhea_scalaqlite_Sqlite3C_bind_1double
 }
 
 JNIEXPORT jint JNICALL Java_org_srhea_scalaqlite_Sqlite3C_bind_1text
-  (JNIEnv *env, jclass cls, jlong jstmt, jint jindex, jstring jvalue)
+  (JNIEnv *env, jclass cls, jlong jstmt, jint jindex, jbyteArray jvalue)
 {
+    jint len = env->GetArrayLength(jvalue);
     jboolean iscopy;
-    jint len = env->GetStringLength(jvalue);
-    const char *cvalue = env->GetStringUTFChars(jvalue, &iscopy);
-    int r = sqlite3_bind_text((sqlite3_stmt*) jstmt, jindex, cvalue, len, SQLITE_TRANSIENT);
-    env->ReleaseStringUTFChars(jvalue, cvalue);
+    jbyte *cvalue = (jbyte *) env->GetByteArrayElements(jvalue, &iscopy);
+    int r = sqlite3_bind_text((sqlite3_stmt*) jstmt, jindex, (const char *) cvalue, len, SQLITE_TRANSIENT);
+    env->ReleaseByteArrayElements(jvalue, cvalue, 0);
     return r;
 }
 
