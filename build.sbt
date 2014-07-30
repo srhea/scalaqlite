@@ -12,9 +12,9 @@ organization := "org.srhea"
 
 version := "0.5-SNAPSHOT"
 
-scalaVersion := "2.9.1"
+scalaVersion := "2.10.3"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "1.7.2" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "1.9.1" % "test"
 
 
 clean <<= (clean, resourceManaged in Compile, sourceDirectory, classDirectory in Compile,

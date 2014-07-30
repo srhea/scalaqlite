@@ -14,6 +14,7 @@ TARGET=libscalaqlite.$(LIBEXT)
 SOURCES=Sqlite3C.cc
 OBJECTS=$(SOURCES:.cpp=.o)
 INSTALLDIR=../../../target/native
+SCALAVER=2.10.3
 
 all: $(TARGET)
 
@@ -41,7 +42,7 @@ install:$(TARGET)
 	mkdir -p ../../../target/native
 	install -m 0755 -t ../../../target/native $<
 
-Sqlite3C.h: ../../../target/scala-2.9.1/classes/org/srhea/scalaqlite/Sqlite3C.class
-	javah -classpath ../../../target/scala-2.9.1/classes org.srhea.scalaqlite.Sqlite3C
+Sqlite3C.h: ../../../target/scala-${SCALAVER}/classes/org/srhea/scalaqlite/Sqlite3C.class
+	javah -classpath ../../../target/scala-${SCALAVER}/classes org.srhea.scalaqlite.Sqlite3C
 
 .PHONY: all, clean, install
