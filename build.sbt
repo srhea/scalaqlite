@@ -1,5 +1,11 @@
 import java.io.File
 
+import AssemblyKeys._
+
+assemblySettings
+
+assemblyOption in assembly ~= { _.copy(includeScala = false) }
+
 name := "scalaqlite"
 
 organization := "org.srhea"
