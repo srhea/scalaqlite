@@ -11,18 +11,25 @@ endif
 
 TARGET=libscalaqlite.$(LIBEXT)
 
+SOURCES=Sqlite3C.cc
+OBJECTS=$(SOURCES:.cpp=.o)
+INSTALLDIR=../../../target/native
+
 all: $(TARGET)
 
 clean:
 	rm -f Sqlite3C.h $(TARGET)
+	rm -rf *.o
+	rm -rf ${INSTALLDIR}
 
-.PHONY: all, clean
+libscalaqlite.so: $(OBJECTS) Sqlite3C.h
+	g++ -O2 -shared -fPIC -o $@ -shared -Wl,-soname,libscalaqlite.so \
+	        -I${JAVA_HOME}/include \
+	        -I${JAVA_HOME}/include/linux \
+		$< -lc -lsqlite3
 
-libscalaqlite.so: Sqlite3C.cc Sqlite3C.h
-	g++ -O2 -o $@ -shared -Wl,-soname,libscalaqlite.so \
-	        -I/usr/lib/jvm/java-6-sun-1.6.0.26/include \
-	        -I/usr/lib/jvm/java-6-sun-1.6.0.26/include/linux \
-		$< -static -lc -lsqlite3
+.cpp.o:
+	$(CC) $(CFLAGS) $< -o $@
 
 libscalaqlite.dylib: Sqlite3C.cc Sqlite3C.h
 	g++ -O2 -dynamiclib -o $@ \
@@ -30,5 +37,11 @@ libscalaqlite.dylib: Sqlite3C.cc Sqlite3C.h
 		-L/opt/local/lib \
 		$< -lsqlite3
 
+install:$(TARGET)
+	mkdir -p ../../../target/native
+	install -m 0755 -t ../../../target/native $<
+
 Sqlite3C.h: ../../../target/scala-2.9.1/classes/org/srhea/scalaqlite/Sqlite3C.class
 	javah -classpath ../../../target/scala-2.9.1/classes org.srhea.scalaqlite.Sqlite3C
+
+.PHONY: all, clean, install
