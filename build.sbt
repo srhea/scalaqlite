@@ -27,7 +27,8 @@ clean <<= (clean, resourceManaged in Compile, sourceDirectory, classDirectory in
       None,
       "COMPILE_PATH" -> classDir.toString,
       "CLASSPATH" -> classpath,
-      "JAVA_HOME" -> home
+      "JAVA_HOME" -> home,
+      "CLASSDIR" -> classDir.toString
       ) ! ;
     //
     if (result != 0)
@@ -48,7 +49,8 @@ compile <<= (compile in Compile, resourceManaged in Compile, sourceDirectory, cl
       None,
       "COMPILE_PATH" -> classDir.toString,
       "CLASSPATH" -> classpath,
-      "JAVA_HOME" -> home
+      "JAVA_HOME" -> home,
+      "CLASSDIR" -> classDir.toString
       ) ! ;
     //
     if (result != 0)
