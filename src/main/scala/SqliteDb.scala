@@ -50,6 +50,10 @@ class SqliteStatement(db: SqliteDb, private val stmt: Array[Long]) {
         params.foldLeft(1) { (i, param) => param.bindValue(stmt(0), i); i + 1 }
         try f(new SqliteResultIterator(db, stmt(0))) finally Sqlite3C.reset(stmt(0))
     }
+    def queryUnsafe(params: SqlValue*): SqliteResultIterator = {
+        params.foldLeft(1) { (i, param) => param.bindValue(stmt(0), i); i + 1 }
+        new SqliteResultIterator(db, stmt(0))
+    }
     def foreachRow(params: SqlValue*)(f: IndexedSeq[SqlValue] => Unit) {
       query(params:_*) { i => i.foreach { row => f(row) } }
     }
@@ -120,6 +124,13 @@ class SqliteDb(path: String) {
           throw new Exception(errmsg)
         val stmt = new SqliteStatement(this, stmtPointer)
         try f(stmt) finally stmt.close
+    }
+    def prepareUnsafe(sql: String): SqliteStatement = {
+        assert(db(0) != 0, "db is closed")
+        val stmtPointer = Array(0L)
+        if (Sqlite3C.prepare_v2(db(0), sql, stmtPointer) != Sqlite3C.OK)
+          throw new Exception(errmsg)
+        new SqliteStatement(this, stmtPointer)
     }
     def query[R](sql: String, params: SqlValue*)(f: Iterator[IndexedSeq[SqlValue]] => R): R =
       prepare(sql)(_.query(params:_*)(f))
