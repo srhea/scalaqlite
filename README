@@ -1,9 +1,19 @@
-scalaqlite - A native Scala library for using Sqlite3
+Scalaqlite - A native Scala library for Sqlite3
+===============================================
 
-I recently wanted to use Sqlite from within Scala for a little project I'm
-working on, and I couldn't find any Scala libraries for doing so.  There are
-Java libraries out there, but they're all very Java-ish, and I'm not crazy
-about Java.
+# Installation
+
+Execute `./build.sh` then copy
+
+```
+target/scala-2.10/scalaqlite-assembly-0.5-SNAPSHOT.jar
+target/native/libscalaqlite.so
+```
+
+To your project 'lib' directory
+
+
+# Description
 
 This library is intended to give a very Scala-ish interface to Sqlite.  For
 example, you can use the follwing code to print all the rows in table "foo"
@@ -21,10 +31,6 @@ Or if you want to add up the values of the first column, you can do this:
         }
     }
 
-I'm pretty new to Scala, and I haven't written much Java in the last few
-years, so this library is definitely a work in progress.  Please send
-constructive feedback, and please be tolerant of interface changes as the
-library matures.
 
 Note that sbt doesn't handle setting java.library.path yet, so you have to run
 the tests like this:
